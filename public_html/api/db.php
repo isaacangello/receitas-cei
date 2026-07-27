@@ -19,8 +19,8 @@ if (!$action) {
     $action = $data['action'] ?? '';
 }
 
-if (!in_array($action, ['setup', 'backup', 'fresh'])) {
-    jsonResponse(['error' => 'Acao invalida. Use: setup, backup, fresh'], 400);
+if (!in_array($action, ['setup', 'export-sql', 'import-sql', 'fresh'])) {
+    jsonResponse(['error' => 'Acao invalida. Use: setup, export-sql, import-sql, fresh'], 400);
 }
 
 try {
@@ -45,42 +45,10 @@ $createTableSQL = "CREATE TABLE IF NOT EXISTS receitas (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 
-function getSeedData() {
-    $jsonPath = __DIR__ . '/../data/receitas.json';
-    if (!file_exists($jsonPath)) return [];
-    $raw = file_get_contents($jsonPath);
-    $data = json_decode($raw, true);
-    return is_array($data) ? $data : [];
-}
-
-function seedTable($pdo, $receitas) {
-    if (empty($receitas)) return 0;
-
-    $count = 0;
-    $stmt = $pdo->prepare("INSERT INTO receitas (id, titulo, categoria, data_receita, descricao, ingredientes, total_farinha, modo_preparo, observacoes, image_url, image_search_query)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-        titulo = VALUES(titulo), categoria = VALUES(categoria), data_receita = VALUES(data_receita),
-        descricao = VALUES(descricao), ingredientes = VALUES(ingredientes), total_farinha = VALUES(total_farinha),
-        modo_preparo = VALUES(modo_preparo), observacoes = VALUES(observacoes), image_url = VALUES(image_url), image_search_query = VALUES(image_search_query)");
-
-    foreach ($receitas as $r) {
-        $stmt->execute([
-            $r['id'],
-            $r['titulo'],
-            $r['categoria'],
-            $r['data'] ?? null,
-            $r['descricao'] ?? '',
-            json_encode($r['ingredientes'] ?? []),
-            $r['total_farinha'] ?? null,
-            $r['modo_preparo'] ?? '',
-            $r['observacoes'] ?? null,
-            $r['image_url'] ?? null,
-            $r['image_search_query'] ?? null,
-        ]);
-        $count++;
-    }
-    return $count;
+function escapeSqlValue($val) {
+    if ($val === null) return 'NULL';
+    if (is_int($val) || is_float($val)) return $val;
+    return "'" . str_replace("'", "''", $val) . "'";
 }
 
 switch ($action) {
@@ -91,54 +59,116 @@ switch ($action) {
         $row = $stmt->fetch();
         $exists = $row['total'] > 0;
 
-        $seeded = 0;
-        if (!$exists) {
-            $receitas = getSeedData();
-            $seeded = seedTable($pdo, $receitas);
-        }
-
         jsonResponse([
             'success' => true,
             'action' => 'setup',
             'table_created' => true,
             'already_existed' => $exists,
-            'seeded' => $seeded,
             'message' => $exists
                 ? "Tabela ja existe com {$row['total']} receitas"
-                : "Tabela criada e {$seeded} receitas importadas",
+                : "Tabela criada",
         ]);
         break;
 
-    case 'backup':
+    case 'export-sql':
+        $stmt = $pdo->query("SHOW CREATE TABLE receitas");
+        $tableRow = $stmt->fetch();
+        $createStmt = $tableRow['Create Table'];
+
         $stmt = $pdo->query("SELECT * FROM receitas ORDER BY data_receita DESC");
         $receitas = $stmt->fetchAll();
-        foreach ($receitas as &$r) {
-            $r['ingredientes'] = json_decode($r['ingredientes'], true);
+
+        $date = date('Y-m-d H:i:s');
+        $lines = [];
+        $lines[] = "-- Receitas CEI Backup";
+        $lines[] = "-- Data: $date";
+        $lines[] = "-- Banco: " . DB_NAME . " @ " . DB_HOST;
+        $lines[] = "-- Total: " . count($receitas) . " receitas";
+        $lines[] = "";
+        $lines[] = "SET FOREIGN_KEY_CHECKS = 0;";
+        $lines[] = "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';";
+        $lines[] = "";
+        $lines[] = "DROP TABLE IF EXISTS `receitas`;";
+        $lines[] = "CREATE TABLE `receitas` ($createStmt);";
+        $lines[] = "";
+
+        $columns = ['id','titulo','categoria','data_receita','descricao','ingredientes','total_farinha','modo_preparo','observacoes','image_url','image_search_query'];
+
+        foreach ($receitas as $r) {
+            $vals = [];
+            foreach ($columns as $col) {
+                $val = $r[$col];
+                if ($col === 'ingredientes') {
+                    $val = json_encode(json_decode($r['ingredientes'], true), JSON_UNESCAPED_UNICODE);
+                }
+                $vals[] = escapeSqlValue($val);
+            }
+            $valsStr = implode(', ', $vals);
+            $colsStr = '`' . implode('`, `', $columns) . '`';
+            $lines[] = "INSERT INTO `receitas` ($colsStr) VALUES ($valsStr);";
         }
+
+        $lines[] = "";
+        $lines[] = "SET FOREIGN_KEY_CHECKS = 1;";
+        $lines[] = "";
+        $lines[] = "-- Fim do backup";
+
+        $sql = implode("\n", $lines);
 
         jsonResponse([
             'success' => true,
-            'action' => 'backup',
+            'action' => 'export-sql',
+            'sql' => $sql,
             'total' => count($receitas),
-            'receitas' => $receitas,
-            'database' => DB_NAME,
-            'host' => DB_HOST,
-            'is_local' => IS_LOCAL,
+            'filename' => 'receitas-backup-' . date('Y-m-d') . '.sql',
+        ]);
+        break;
+
+    case 'import-sql':
+        $body = json_decode(file_get_contents('php://input'), true);
+        $sql = $body['sql'] ?? '';
+        if (!$sql) {
+            jsonResponse(['error' => 'Campo sql obrigatorio'], 400);
+        }
+
+        $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+
+        $stmts = array_filter(array_map('trim', explode(";\n", $sql)));
+        $executed = 0;
+        $errors = [];
+
+        foreach ($stmts as $stmt) {
+            if ($stmt === '' || $stmt[0] === '-') continue;
+            try {
+                $pdo->exec($stmt);
+                $executed++;
+            } catch (PDOException $e) {
+                $short = substr($stmt, 0, 80);
+                $errors[] = "$short... => " . $e->getMessage();
+            }
+        }
+
+        $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
+
+        $countStmt = $pdo->query("SELECT COUNT(*) as total FROM receitas");
+        $total = $countStmt->fetch()['total'];
+
+        jsonResponse([
+            'success' => true,
+            'action' => 'import-sql',
+            'statements_executed' => $executed,
+            'total_receitas' => $total,
+            'errors' => count($errors),
+            'error_details' => $errors,
         ]);
         break;
 
     case 'fresh':
-        $pdo->exec("DROP TABLE IF EXISTS receitas");
-        $pdo->exec($createTableSQL);
-
-        $receitas = getSeedData();
-        $seeded = seedTable($pdo, $receitas);
-
+        $pdo->exec("DELETE FROM receitas");
         jsonResponse([
             'success' => true,
             'action' => 'fresh',
-            'seeded' => $seeded,
-            'message' => "Banco resetado e {$seeded} receitas importadas",
+            'message' => 'Banco de dados zerado',
         ]);
         break;
 }

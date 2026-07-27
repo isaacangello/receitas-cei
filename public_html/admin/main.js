@@ -331,19 +331,62 @@ Alpine.data('adminApp', () => ({
   },
 
   async backupDb() {
-    const result = await this.dbAction('backup')
+    const result = await this.dbAction('export-sql')
     if (!result) return
 
-    const blob = new Blob([JSON.stringify(result.receitas, null, 2)], { type: 'application/json' })
+    const blob = new Blob([result.sql], { type: 'application/sql' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `receitas-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = result.filename
     a.click()
     URL.revokeObjectURL(url)
 
-    this.message = `Backup baixado: ${result.total} receitas de ${result.database}`
+    this.message = `Backup baixado: ${result.total} receitas em .sql`
     setTimeout(() => (this.message = ''), 5000)
+  },
+
+  async restoreDb() {
+    const input = document.getElementById('restore-file')
+    const file = input.files[0]
+    if (!file) {
+      this.error = 'Selecione um arquivo .sql'
+      return
+    }
+    if (!file.name.endsWith('.sql')) {
+      this.error = 'Arquivo deve ter extensao .sql'
+      return
+    }
+    if (!confirm('ATENCAO: Isso vai SUBSTITUIR todas as receitas atuais pelo conteudo do backup. Continuar?')) return
+
+    this.message = 'Importando backup...'
+    this.error = ''
+
+    const text = await file.text()
+    try {
+      const res = await fetch(this.API + '/db.php?action=import-sql', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this.csrfToken,
+        },
+        body: JSON.stringify({ sql: text }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        let msg = `${data.total_receitas} receitas no banco`
+        if (data.errors > 0) msg += `, ${data.errors} erros`
+        this.message = msg
+        await this.loadReceitas()
+        setTimeout(() => (this.message = ''), 5000)
+      } else {
+        this.error = data.error || 'Erro ao importar backup'
+      }
+    } catch (e) {
+      this.error = 'Erro ao importar: ' + e.message
+    }
+    input.value = ''
   },
 
   async searchImage() {
@@ -416,7 +459,7 @@ Alpine.data('adminApp', () => ({
   },
 
   async freshDb() {
-    if (!confirm('ATENCAO: Isso vai APAGAR TODAS as receitas do banco e importar as receitas do JSON inicial. Continuar?')) return
+    if (!confirm('ATENCAO: Isso vai APAGAR TODAS as receitas do banco. Continuar?')) return
     const result = await this.dbAction('fresh')
     if (result) {
       this.message = result.message
