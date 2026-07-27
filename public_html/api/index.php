@@ -10,12 +10,14 @@ $routes = [
     '/api/images'       => __DIR__ . '/images.php',
     '/api/receitas'     => __DIR__ . '/receitas.php',
     '/api/db'           => __DIR__ . '/db.php',
+    '/api/batch-import' => __DIR__ . '/batch-import.php',
     '/api/auth.php'     => __DIR__ . '/auth.php',
     '/api/csrf.php'     => __DIR__ . '/csrf.php',
     '/api/receitas.php' => __DIR__ . '/receitas.php',
     '/api/import.php'   => __DIR__ . '/import.php',
     '/api/images.php'   => __DIR__ . '/images.php',
     '/api/db.php'       => __DIR__ . '/db.php',
+    '/api/batch-import.php' => __DIR__ . '/batch-import.php',
 ];
 
 if (isset($routes[$uri])) {

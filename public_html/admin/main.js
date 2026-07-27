@@ -21,6 +21,8 @@ Alpine.data('adminApp', () => ({
   importPreview: '',
   importRecipe: null,
   importError: '',
+  batchImporting: false,
+  batchImportResult: '',
 
   API: '/api',
 
@@ -381,6 +383,35 @@ Alpine.data('adminApp', () => ({
       }
     } catch (e) {
       this.importError = 'Erro ao buscar imagem: ' + e.message
+    }
+  },
+
+  async batchImport() {
+    if (!confirm('Importar todos os .doc da pasta de receitas? Duplicatas serao puladas automaticamente.')) return
+    this.batchImporting = true
+    this.batchImportResult = ''
+    this.error = ''
+    try {
+      const res = await fetch(this.API + '/batch-import.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this.csrfToken,
+        },
+      })
+      const data = await res.json()
+      if (data.success) {
+        this.batchImportResult = `${data.imported} importadas, ${data.skipped} puladas, ${data.errors} erros`
+        await this.loadReceitas()
+        setTimeout(() => (this.batchImportResult = ''), 10000)
+      } else {
+        this.error = data.error || 'Erro na importacao'
+      }
+    } catch (e) {
+      this.error = 'Erro na importacao: ' + e.message
+    } finally {
+      this.batchImporting = false
     }
   },
 

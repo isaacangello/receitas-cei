@@ -1,70 +1,83 @@
 <?php
 /**
  * Importacao em lote de receitas .doc/.txt
- * Rodar: php public_html/api/batch-import.php
+ * CLI: php public_html/api/batch-import.php [docsDir]
+ * API: POST /api/batch-import { "docsDir": "/caminho/para/docs" }
  */
 
 $isCli = php_sapi_name() === 'cli';
-if (!$isCli) {
-    http_response_code(403);
-    echo 'Acesso negado';
-    exit;
-}
 
 require_once __DIR__ . '/import.php';
 
-$docsDir = $argv[1] ?? '/home/isaacca/hd/Codigos/site_pessoal/pao.50webs.org/receitas/docs/Receitas';
+if (!$isCli) {
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(204);
+        exit;
+    }
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        jsonResponse(['error' => 'Method not allowed'], 405);
+    }
+    requireAuth();
+    requireCsrf('POST');
+}
+
+$jsonBody = $isCli ? [] : (json_decode(file_get_contents('php://input'), true) ?: []);
+$docsDir = $argv[1] ?? $jsonBody['docsDir'] ?? '/home/isaacca/hd/Codigos/site_pessoal/pao.50webs.org/receitas/docs/Receitas';
+
 $tmpDir = sys_get_temp_dir() . '/batch_import_' . uniqid();
 
-echo "=== Importacao em lote de receitas ===\n";
-echo "Pasta: $docsDir\n\n";
+$log = [];
+function apiLog($msg) use (&$log, $isCli) {
+    $log[] = $msg;
+    if ($isCli) echo $msg . "\n";
+}
 
-// 1. Listar arquivos .doc
+apiLog("=== Importacao em lote de receitas ===");
+apiLog("Pasta: $docsDir");
+
 $docFiles = glob($docsDir . '/*.doc');
 if (empty($docFiles)) {
-    echo "Nenhum arquivo .doc encontrado em $docsDir\n";
-    exit(1);
+    $resp = ['error' => "Nenhum arquivo .doc encontrado em $docsDir"];
+    if ($isCli) { echo $resp['error'] . "\n"; exit(1); }
+    jsonResponse($resp, 404);
 }
-echo "Encontrados " . count($docFiles) . " arquivos .doc\n";
+apiLog("Encontrados " . count($docFiles) . " arquivos .doc");
 
-// 2. Converter .doc -> .txt com LibreOffice
-echo "Convertendo .doc para .txt com LibreOffice...\n";
+apiLog("Convertendo .doc para .txt com LibreOffice...");
 mkdir($tmpDir, 0755, true);
 exec("libreoffice --headless --convert-to txt --outdir " . escapeshellarg($tmpDir) . " " . escapeshellarg($docsDir) . "/*.doc 2>&1", $convertOutput, $convertExit);
 if ($convertExit !== 0) {
-    echo "Erro na conversao:\n" . implode("\n", $convertOutput) . "\n";
-    exit(1);
+    $resp = ['error' => 'Erro na conversao', 'output' => $convertOutput];
+    if ($isCli) { echo "Erro na conversao:\n" . implode("\n", $convertOutput) . "\n"; exit(1); }
+    jsonResponse($resp, 500);
 }
 
 $txtFiles = glob($tmpDir . '/*.txt');
-echo "Convertidos " . count($txtFiles) . " arquivos .txt\n\n";
+apiLog("Convertidos " . count($txtFiles) . " arquivos .txt");
 
-// 3. Conectar ao banco
 try {
     $pdo = getDb();
-    echo "Conectado ao banco de dados\n\n";
 } catch (PDOException $e) {
-    echo "Erro ao conectar ao banco: " . $e->getMessage() . "\n";
-    exit(1);
+    $resp = ['error' => 'Erro ao conectar ao banco: ' . $e->getMessage()];
+    if ($isCli) { echo $resp['error'] . "\n"; exit(1); }
+    jsonResponse($resp, 500);
 }
 
-// 4. Verificar receitas existentes
 $stmt = $pdo->query("SELECT id FROM receitas");
 $existingIds = array_column($stmt->fetchAll(), 'id');
-echo "Receitas existentes no banco: " . count($existingIds) . "\n\n";
+apiLog("Receitas existentes no banco: " . count($existingIds));
 
-// 5. Processar cada arquivo
 $imported = 0;
 $skipped = 0;
 $errors = [];
+$results = [];
 $imagesFound = 0;
 $imagesFallback = 0;
 
 foreach ($txtFiles as $txtFile) {
     $basename = basename($txtFile, '.txt');
-    $docFile = basename($docFiles[0]); // fallback
+    $docFile = basename($docFiles[0]);
 
-    // Encontrar o .doc original correspondente
     foreach ($docFiles as $df) {
         if (basename($df, '.doc') === $basename) {
             $docFile = basename($df);
@@ -72,11 +85,8 @@ foreach ($txtFiles as $txtFile) {
         }
     }
 
-    echo "--- Processando: $docFile ---\n";
-
     $text = file_get_contents($txtFile);
     if ($text === false || trim($text) === '') {
-        echo "  AVISO: Arquivo vazio, pulando\n";
         $errors[] = "$docFile: arquivo vazio";
         $skipped++;
         continue;
@@ -85,14 +95,12 @@ foreach ($txtFiles as $txtFile) {
     $text = trim($text);
     $recipe = parseRecipeFromText($text, $docFile);
 
-    // Pular duplicatas
     if (in_array($recipe['id'], $existingIds)) {
-        echo "  PULADO (duplicata): {$recipe['id']}\n";
+        apiLog("  PULADO: {$recipe['id']} ({$recipe['titulo']})");
         $skipped++;
         continue;
     }
 
-    // Buscar imagem
     $imageResult = fetchRecipeImage($recipe['titulo'], $recipe['categoria']);
     $recipe['image_url'] = $imageResult['url'];
     $recipe['image_search_query'] = $imageResult['query'];
@@ -103,12 +111,8 @@ foreach ($txtFiles as $txtFile) {
         $imagesFound++;
     }
 
-    echo "  ID: {$recipe['id']}\n";
-    echo "  Titulo: {$recipe['titulo']}\n";
-    echo "  Categoria: {$recipe['categoria']}\n";
-    echo "  Imagem: {$imageResult['source']}\n";
+    apiLog("  OK: {$recipe['titulo']} [{$recipe['categoria']}] img:{$imageResult['source']}");
 
-    // Salvar no banco
     $ingredientesJson = json_encode($recipe['ingredientes'], JSON_UNESCAPED_UNICODE);
     $stmt = $pdo->prepare("INSERT INTO receitas (id, titulo, categoria, data_receita, descricao, ingredientes, total_farinha, modo_preparo, observacoes, image_url, image_search_query)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -131,31 +135,41 @@ foreach ($txtFiles as $txtFile) {
             $recipe['image_url'],
             $recipe['image_search_query'],
         ]);
-        echo "  OK\n";
         $existingIds[] = $recipe['id'];
         $imported++;
+        $results[] = ['id' => $recipe['id'], 'titulo' => $recipe['titulo'], 'status' => 'ok'];
     } catch (PDOException $e) {
-        echo "  ERRO: " . $e->getMessage() . "\n";
         $errors[] = "$docFile: " . $e->getMessage();
+        $results[] = ['id' => $recipe['id'], 'titulo' => $recipe['titulo'], 'status' => 'error', 'error' => $e->getMessage()];
     }
-
-    echo "\n";
 }
 
-// 6. Limpar temporarios
 exec("rm -rf " . escapeshellarg($tmpDir));
 
-// 7. Relatorio
-echo "=== RELATORIO ===\n";
-echo "Importadas: $imported\n";
-echo "Puladas (duplicatas): $skipped\n";
-echo "Erros: " . count($errors) . "\n";
-echo "Imagens do Unsplash/MealDB: $imagesFound\n";
-echo "Imagens fallback (Picsum): $imagesFallback\n";
-if (!empty($errors)) {
-    echo "\nErros:\n";
-    foreach ($errors as $err) {
-        echo "  - $err\n";
+apiLog("");
+apiLog("=== RELATORIO ===");
+apiLog("Importadas: $imported");
+apiLog("Puladas (duplicatas): $skipped");
+apiLog("Erros: " . count($errors));
+apiLog("Imagens Unsplash/MealDB: $imagesFound");
+apiLog("Imagens fallback: $imagesFallback");
+
+if ($isCli) {
+    if (!empty($errors)) {
+        echo "\nErros:\n";
+        foreach ($errors as $err) echo "  - $err\n";
     }
+    echo "\nConcluido!\n";
+    exit(0);
 }
-echo "\nConcluido!\n";
+
+jsonResponse([
+    'success' => true,
+    'imported' => $imported,
+    'skipped' => $skipped,
+    'errors' => count($errors),
+    'images_found' => $imagesFound,
+    'images_fallback' => $imagesFallback,
+    'results' => $results,
+    'error_details' => $errors,
+]);
