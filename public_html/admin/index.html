@@ -266,7 +266,7 @@
     <!-- DB Management -->
     <div class="mt-8 bg-white rounded-2xl shadow-lg p-6">
       <h2 class="font-display text-xl font-bold text-primary mb-4">Banco de Dados</h2>
-      <div class="flex flex-wrap gap-3">
+      <div class="flex flex-wrap gap-3 items-center">
         <button @click="setupDb()"
           class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-colors text-sm">
           Criar/Banco
@@ -275,12 +275,17 @@
           class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors text-sm">
           Backup
         </button>
+        <input type="file" id="restore-file" accept=".sql" class="hidden" @change="restoreDb()">
+        <button @click="document.getElementById('restore-file').click()"
+          class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors text-sm">
+          Restaurar
+        </button>
         <button @click="freshDb()"
           class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors text-sm">
           Resetar
         </button>
       </div>
-      <p class="text-xs text-gray-400 mt-3">Criar/Banco: cria tabela e importa receitas do JSON se vazia. Backup: baixa JSON com todos os dados. Resetar: apaga tudo e reimporta.</p>
+      <p class="text-xs text-gray-400 mt-3">Criar/Banco: cria tabela. Backup: baixa dump .sql. Restaurar: importa dump .sql. Resetar: apaga todas as receitas.</p>
     </div>
 
     <!-- Edit/Create Modal -->
