@@ -1,49 +1,52 @@
 <?php
 require_once __DIR__ . '/config.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
-    exit;
+$isCli = php_sapi_name() === 'cli';
+
+if (!$isCli) {
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(204);
+        exit;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        jsonResponse(['error' => 'Method not allowed'], 405);
+    }
+
+    requireAuth();
+    requireCsrf('POST');
+
+    $jsonBody = json_decode(file_get_contents('php://input'), true);
+    $text = $jsonBody['text'] ?? '';
+    $filename = $jsonBody['filename'] ?? '';
+
+    if (!$text || !$filename) {
+        jsonResponse(['error' => 'Campos text e filename obrigatorios'], 400);
+    }
+
+    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+    if (!in_array($ext, ['doc', 'docx', 'txt', 'md'])) {
+        jsonResponse(['error' => "Formato nao suportado: .$ext"], 400);
+    }
+
+    $text = trim($text);
+    if (!$text) {
+        jsonResponse(['error' => 'Texto vazio'], 422);
+    }
+
+    $recipe = parseRecipeFromText($text, $filename);
+
+    $imageResult = fetchRecipeImage($recipe['titulo'], $recipe['categoria']);
+    $recipe['image_url'] = $imageResult['url'];
+    $recipe['image_search_query'] = $imageResult['query'];
+
+    jsonResponse([
+        'receita' => $recipe,
+        'texto_original' => $text,
+        'filename' => $filename,
+    ]);
 }
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    jsonResponse(['error' => 'Method not allowed'], 405);
-}
-
-requireAuth();
-requireCsrf('POST');
-
-$jsonBody = json_decode(file_get_contents('php://input'), true);
-$text = $jsonBody['text'] ?? '';
-$filename = $jsonBody['filename'] ?? '';
-
-if (!$text || !$filename) {
-    jsonResponse(['error' => 'Campos text e filename obrigatorios'], 400);
-}
-
-$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-
-if (!in_array($ext, ['doc', 'docx', 'txt', 'md'])) {
-    jsonResponse(['error' => "Formato nao suportado: .$ext"], 400);
-}
-
-$text = trim($text);
-if (!$text) {
-    jsonResponse(['error' => 'Texto vazio'], 422);
-}
-
-$recipe = parseRecipeFromText($text, $filename);
-
-// Buscar imagem automaticamente
-$imageResult = fetchRecipeImage($recipe['titulo'], $recipe['categoria']);
-$recipe['image_url'] = $imageResult['url'];
-$recipe['image_search_query'] = $imageResult['query'];
-
-jsonResponse([
-    'receita' => $recipe,
-    'texto_original' => $text,
-    'filename' => $filename,
-]);
 
 function detectCategoria($text) {
     $t = strtolower($text);
@@ -255,6 +258,24 @@ function parseSections($text) {
     ];
 }
 
+function flattenToNested($flat) {
+    $nested = [];
+    foreach ($flat as $key => $value) {
+        $parts = explode('/', $key);
+        if (count($parts) === 1) {
+            $nested[$parts[0]] = $value;
+        } else {
+            $group = $parts[0];
+            $item = $parts[1];
+            if (!isset($nested[$group]) || !is_array($nested[$group])) {
+                $nested[$group] = [];
+            }
+            $nested[$group][$item] = $value;
+        }
+    }
+    return $nested;
+}
+
 function parseRecipeFromText($text, $filename) {
     $lines = array_filter(explode("\n", $text), function ($l) { return trim($l) !== ''; });
     $lines = array_map('trim', $lines);
@@ -273,13 +294,29 @@ function parseRecipeFromText($text, $filename) {
         })));
     }
 
+    $ingredientes = $sections['ingredientes'];
+    $hasGroups = !empty($ingredientes) && array_keys($ingredientes) !== range(0, count($ingredientes) - 1);
+    if ($hasGroups) {
+        $firstVal = reset($ingredientes);
+        if (is_array($firstVal)) {
+            // already nested
+        } else {
+            $hasSlash = array_reduce(array_keys($ingredientes), function ($carry, $k) {
+                return $carry || strpos($k, '/') !== false;
+            }, false);
+            if ($hasSlash) {
+                $ingredientes = flattenToNested($ingredientes);
+            }
+        }
+    }
+
     return [
         'id' => $id,
         'titulo' => $titulo,
         'categoria' => $cat,
         'data' => $data,
         'descricao' => "Receita importada de $filename",
-        'ingredientes' => $sections['ingredientes'],
+        'ingredientes' => $ingredientes,
         'modo_preparo' => $sections['modo_preparo'],
         'observacoes' => '',
     ];
