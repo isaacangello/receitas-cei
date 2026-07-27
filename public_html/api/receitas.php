@@ -22,7 +22,7 @@ try {
 switch ($method) {
     case 'GET':
         if (isset($_GET['id'])) {
-            $stmt = $pdo->prepare("SELECT * FROM receitas WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT *, data_receita AS data FROM receitas WHERE id = ?");
             $stmt->execute([$_GET['id']]);
             $receita = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($receita) {
@@ -32,7 +32,7 @@ switch ($method) {
             jsonResponse(['error' => 'Receita nao encontrada'], 404);
         }
 
-        $sql = "SELECT * FROM receitas";
+        $sql = "SELECT *, data_receita AS data FROM receitas";
         $params = [];
         if (isset($_GET['categoria'])) {
             $sql .= " WHERE categoria = ?";

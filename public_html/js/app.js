@@ -1,5 +1,4 @@
 import Alpine from 'alpinejs'
-import receitasData from '../data/receitas.json'
 
 window.Alpine = Alpine
 
@@ -34,10 +33,24 @@ Alpine.store('router', {
 })
 
 Alpine.store('receitas', {
-  items: receitasData,
+  items: [],
+  filtered: null,
+  loaded: false,
+
+  async init() {
+    try {
+      const res = await fetch('/api/receitas.php')
+      if (res.ok) {
+        this.items = await res.json()
+      }
+    } catch (e) {
+      console.error('Falha ao carregar receitas:', e)
+    }
+    this.loaded = true
+  },
 
   getAll() {
-    return this.items
+    return this.filtered ?? this.items
   },
 
   getByCategoria(cat) {
@@ -53,8 +66,12 @@ Alpine.store('receitas', {
   },
 
   search(query) {
+    if (!query) {
+      this.filtered = null
+      return
+    }
     const q = query.toLowerCase()
-    return this.items.filter(r =>
+    this.filtered = this.items.filter(r =>
       r.titulo.toLowerCase().includes(q) ||
       r.descricao.toLowerCase().includes(q) ||
       r.categoria.toLowerCase().includes(q)
