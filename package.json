@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npx vite\" \"php -S localhost:8080 public_html/api/index.php\"",
+    "dev": "concurrently \"npx vite\" \"php -S localhost:8080 -t public_html\"",
     "dev:vite": "npx vite",
-    "dev:php": "php -S localhost:8080 public_html/api/index.php",
+    "dev:php": "php -S localhost:8080 -t public_html",
     "build": "vite build",
     "preview": "vite preview"
   },
