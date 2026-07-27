@@ -43,10 +43,14 @@ function env($key, $default = null) {
 
 loadEnv(__DIR__ . '/../.env') || loadEnv(__DIR__ . '/../../.env');
 
-define('DB_HOST', env('DB_HOST', 'sql202.infinityfree.com'));
-define('DB_NAME', env('DB_NAME', 'if0_42505744_receitas'));
-define('DB_USERNAME', env('DB_USERNAME', 'if0_42505744'));
-define('DB_PASSWORD', env('DB_PASSWORD', ''));
+$isLocal = env('DB_LOCAL_DATABASE') !== null && env('DB_LOCAL_DATABASE') !== '';
+
+define('DB_HOST', $isLocal ? env('DB_LOCAL_HOST', '127.0.0.1') : env('DB_HOST', 'sql202.infinityfree.com'));
+define('DB_PORT', $isLocal ? env('DB_LOCAL_PORT', '3306') : '3306');
+define('DB_NAME', $isLocal ? env('DB_LOCAL_DATABASE') : env('DB_NAME', 'if0_42505744_receitas'));
+define('DB_USERNAME', $isLocal ? env('DB_LOCAL_USERNAME') : env('DB_USERNAME', 'if0_42505744'));
+define('DB_PASSWORD', $isLocal ? env('DB_LOCAL_PASSWORD', '') : env('DB_PASSWORD', ''));
+define('IS_LOCAL', $isLocal);
 define('ADMIN_KEY', env('ADMIN_KEY', ''));
 
 define('MAX_FILE_SIZE', 5 * 1024 * 1024);
@@ -92,12 +96,11 @@ function requireCsrf($method) {
 function getDb() {
     static $pdo = null;
     if ($pdo === null) {
-        $pdo = new PDO(
-            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-            DB_USERNAME,
-            DB_PASSWORD,
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
+        $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+        $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
     }
     return $pdo;
 }

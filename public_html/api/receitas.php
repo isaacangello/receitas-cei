@@ -19,20 +19,6 @@ try {
     jsonResponse(['error' => 'Banco de dados indisponivel', 'detail' => $e->getMessage()], 503);
 }
 
-$pdo->exec("CREATE TABLE IF NOT EXISTS receitas (
-    id VARCHAR(100) PRIMARY KEY,
-    titulo VARCHAR(255) NOT NULL,
-    categoria VARCHAR(100) NOT NULL,
-    data_receita DATE,
-    descricao TEXT,
-    ingredientes JSON,
-    total_farinha VARCHAR(100),
-    modo_preparo TEXT,
-    observacoes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
 switch ($method) {
     case 'GET':
         if (isset($_GET['id'])) {

@@ -280,6 +280,60 @@ Alpine.data('adminApp', () => ({
       observacoes: recipe.observacoes || '',
     }
   },
+
+  async dbAction(action) {
+    this.error = ''
+    this.message = ''
+    try {
+      const res = await fetch(this.API + '/db.php?action=' + action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: this.authHeaders(),
+        body: JSON.stringify({ action }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro ao executar acao')
+      return data
+    } catch (e) {
+      this.error = 'Erro: ' + e.message
+      return null
+    }
+  },
+
+  async setupDb() {
+    const result = await this.dbAction('setup')
+    if (result) {
+      this.message = result.message
+      await this.loadReceitas()
+      setTimeout(() => (this.message = ''), 5000)
+    }
+  },
+
+  async backupDb() {
+    const result = await this.dbAction('backup')
+    if (!result) return
+
+    const blob = new Blob([JSON.stringify(result.receitas, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `receitas-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    this.message = `Backup baixado: ${result.total} receitas de ${result.database}`
+    setTimeout(() => (this.message = ''), 5000)
+  },
+
+  async freshDb() {
+    if (!confirm('ATENCAO: Isso vai APAGAR TODAS as receitas do banco e importar as receitas do JSON inicial. Continuar?')) return
+    const result = await this.dbAction('fresh')
+    if (result) {
+      this.message = result.message
+      await this.loadReceitas()
+      setTimeout(() => (this.message = ''), 5000)
+    }
+  },
 }))
 
 Alpine.start()
