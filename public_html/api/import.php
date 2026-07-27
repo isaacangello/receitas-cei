@@ -33,6 +33,11 @@ if (!$text) {
 }
 
 $recipe = parseRecipeFromText($text, $filename);
+
+// Buscar imagem automaticamente
+$imageUrl = fetchRecipeImage($recipe['titulo'], $recipe['categoria']);
+$recipe['image_url'] = $imageUrl;
+
 jsonResponse([
     'receita' => $recipe,
     'texto_original' => $text,
@@ -277,4 +282,47 @@ function parseRecipeFromText($text, $filename) {
         'modo_preparo' => $sections['modo_preparo'],
         'observacoes' => '',
     ];
+}
+
+function fetchRecipeImage($titulo, $categoria) {
+    $searchTerms = [$titulo, $categoria];
+    $searchTerm = implode(' ', $searchTerms);
+    $searchTerm = urlencode($searchTerm);
+
+    // 1. TheMealDB (gratis, sem API key)
+    $mealDbUrl = "https://www.themealdb.com/api/json/v1/1/search.php?s={$searchTerm}";
+    $mealData = fetchUrlExternal($mealDbUrl);
+    if ($mealData && isset($mealData['meals']) && count($mealData['meals']) > 0) {
+        $thumb = $mealData['meals'][0]['strMealThumb'] ?? null;
+        if ($thumb) {
+            return $thumb . '/preview';
+        }
+    }
+
+    // 2. Unsplash API (precisa de API key)
+    $unsplashKey = env('UNSPLASH_ACCESS_KEY', '');
+    if (!empty($unsplashKey)) {
+        $unsplashUrl = "https://api.unsplash.com/search/photos?query={$searchTerm}&per_page=1&client_id={$unsplashKey}";
+        $unsplashData = fetchUrlExternal($unsplashUrl);
+        if ($unsplashData && isset($unsplashData['results'][0]['urls']['small'])) {
+            return $unsplashData['results'][0]['urls']['small'];
+        }
+    }
+
+    // 3. Picsum (fallback garantido)
+    $seed = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($titulo));
+    return "https://picsum.photos/seed/{$seed}/400/300";
+}
+
+function fetchUrlExternal($url) {
+    $ctx = stream_context_create([
+        'http' => [
+            'timeout' => 5,
+            'ignore_errors' => true,
+            'header' => "User-Agent: ReceitasCEI/1.0\r\n",
+        ],
+    ]);
+    $response = @file_get_contents($url, false, $ctx);
+    if ($response === false) return null;
+    return json_decode($response, true);
 }

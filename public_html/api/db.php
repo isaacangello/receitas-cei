@@ -39,6 +39,7 @@ $createTableSQL = "CREATE TABLE IF NOT EXISTS receitas (
     total_farinha VARCHAR(100),
     modo_preparo TEXT,
     observacoes TEXT,
+    image_url VARCHAR(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
@@ -55,12 +56,12 @@ function seedTable($pdo, $receitas) {
     if (empty($receitas)) return 0;
 
     $count = 0;
-    $stmt = $pdo->prepare("INSERT INTO receitas (id, titulo, categoria, data_receita, descricao, ingredientes, total_farinha, modo_preparo, observacoes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    $stmt = $pdo->prepare("INSERT INTO receitas (id, titulo, categoria, data_receita, descricao, ingredientes, total_farinha, modo_preparo, observacoes, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
         titulo = VALUES(titulo), categoria = VALUES(categoria), data_receita = VALUES(data_receita),
         descricao = VALUES(descricao), ingredientes = VALUES(ingredientes), total_farinha = VALUES(total_farinha),
-        modo_preparo = VALUES(modo_preparo), observacoes = VALUES(observacoes)");
+        modo_preparo = VALUES(modo_preparo), observacoes = VALUES(observacoes), image_url = VALUES(image_url)");
 
     foreach ($receitas as $r) {
         $stmt->execute([
@@ -73,6 +74,7 @@ function seedTable($pdo, $receitas) {
             $r['total_farinha'] ?? null,
             $r['modo_preparo'] ?? '',
             $r['observacoes'] ?? null,
+            $r['image_url'] ?? null,
         ]);
         $count++;
     }

@@ -13,7 +13,7 @@ Alpine.data('adminApp', () => ({
   message: '',
   showForm: false,
   editing: false,
-  form: { id: '', titulo: '', categoria: 'Paes', data: '', descricao: '', ingredientes_json: '{}', modo_preparo: '', observacoes: '' },
+  form: { id: '', titulo: '', categoria: 'Paes', data: '', descricao: '', ingredientes_json: '{}', modo_preparo: '', observacoes: '', image_url: '' },
 
   importState: 'idle',
   dragOver: false,
@@ -88,7 +88,7 @@ Alpine.data('adminApp', () => ({
   resetForm() {
     this.editing = false
     this.error = ''
-    this.form = { id: '', titulo: '', categoria: 'Paes', data: '', descricao: '', ingredientes_json: '{}', modo_preparo: '', observacoes: '' }
+    this.form = { id: '', titulo: '', categoria: 'Paes', data: '', descricao: '', ingredientes_json: '{}', modo_preparo: '', observacoes: '', image_url: '' }
   },
 
   editReceita(r) {
@@ -103,6 +103,7 @@ Alpine.data('adminApp', () => ({
       ingredientes_json: JSON.stringify(r.ingredientes || {}, null, 2),
       modo_preparo: r.modo_preparo || '',
       observacoes: r.observacoes || '',
+      image_url: r.image_url || '',
     }
     this.showForm = true
   },
@@ -125,6 +126,7 @@ Alpine.data('adminApp', () => ({
       ingredientes,
       modo_preparo: this.form.modo_preparo,
       observacoes: this.form.observacoes,
+      image_url: this.form.image_url,
     }
 
     const method = this.editing ? 'PUT' : 'POST'
@@ -291,6 +293,7 @@ Alpine.data('adminApp', () => ({
       ingredientes_json: JSON.stringify(recipe.ingredientes, null, 2),
       modo_preparo: recipe.modo_preparo,
       observacoes: recipe.observacoes || '',
+      image_url: recipe.image_url || '',
     }
   },
 

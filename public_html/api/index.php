@@ -7,12 +7,14 @@ $routes = [
     '/api/csrf'         => __DIR__ . '/csrf.php',
     '/api/auth'         => __DIR__ . '/auth.php',
     '/api/import'       => __DIR__ . '/import.php',
+    '/api/images'       => __DIR__ . '/images.php',
     '/api/receitas'     => __DIR__ . '/receitas.php',
     '/api/db'           => __DIR__ . '/db.php',
     '/api/auth.php'     => __DIR__ . '/auth.php',
     '/api/csrf.php'     => __DIR__ . '/csrf.php',
     '/api/receitas.php' => __DIR__ . '/receitas.php',
     '/api/import.php'   => __DIR__ . '/import.php',
+    '/api/images.php'   => __DIR__ . '/images.php',
     '/api/db.php'       => __DIR__ . '/db.php',
 ];
 

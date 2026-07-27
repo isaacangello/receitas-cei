@@ -57,12 +57,12 @@ switch ($method) {
         }
 
         $id = preg_replace('/[^a-zA-Z0-9_-]/', '', $data['id']);
-        $stmt = $pdo->prepare("INSERT INTO receitas (id, titulo, categoria, data_receita, descricao, ingredientes, total_farinha, modo_preparo, observacoes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        $stmt = $pdo->prepare("INSERT INTO receitas (id, titulo, categoria, data_receita, descricao, ingredientes, total_farinha, modo_preparo, observacoes, image_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
             titulo = VALUES(titulo), categoria = VALUES(categoria), data_receita = VALUES(data_receita),
             descricao = VALUES(descricao), ingredientes = VALUES(ingredientes), total_farinha = VALUES(total_farinha),
-            modo_preparo = VALUES(modo_preparo), observacoes = VALUES(observacoes)");
+            modo_preparo = VALUES(modo_preparo), observacoes = VALUES(observacoes), image_url = VALUES(image_url)");
         $stmt->execute([
             $id,
             $data['titulo'],
@@ -73,6 +73,7 @@ switch ($method) {
             $data['total_farinha'] ?? null,
             $data['modo_preparo'] ?? '',
             $data['observacoes'] ?? null,
+            $data['image_url'] ?? null,
         ]);
         jsonResponse(['success' => true, 'id' => $id]);
         break;
@@ -86,7 +87,7 @@ switch ($method) {
         $id = preg_replace('/[^a-zA-Z0-9_-]/', '', $data['id']);
         $fields = [];
         $params = [];
-        $map = ['titulo', 'categoria', 'data' => 'data_receita', 'descricao', 'total_farinha', 'modo_preparo', 'observacoes'];
+        $map = ['titulo', 'categoria', 'data' => 'data_receita', 'descricao', 'total_farinha', 'modo_preparo', 'observacoes', 'image_url'];
 
         foreach ($map as $key => $col) {
             $field = is_int($key) ? $col : $key;

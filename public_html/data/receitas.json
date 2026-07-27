@@ -5,6 +5,7 @@
     "categoria": "Paes",
     "data": "2009-10-19",
     "descricao": "Receita de brioche rapido passada em sala de aula.",
+    "image_url": "https://picsum.photos/seed/brioche-rapido/400/300",
     "ingredientes": {
       "esponja": {
         "farinha": "500g (80%)",
@@ -32,6 +33,7 @@
     "categoria": "Paes",
     "data": "2009-10-20",
     "descricao": "Receita de pao de hamburguer passada em sala de aula.",
+    "image_url": "https://picsum.photos/seed/pao-de-hamburguer/400/300",
     "ingredientes": {
       "farinha": "100%",
       "reforcador": "1%",
@@ -49,6 +51,7 @@
     "categoria": "Broas",
     "data": "2009-10-22",
     "descricao": "Receita de broa cachambu, tambem conhecida como cavaca.",
+    "image_url": "https://picsum.photos/seed/broa-cachambu/400/300",
     "ingredientes": {
       "farinha": "100%",
       "fuba": "100%",
@@ -66,6 +69,7 @@
     "categoria": "Broas",
     "data": "2009-10-22",
     "descricao": "Receita de broa de milho passada em sala de aula.",
+    "image_url": "https://picsum.photos/seed/broa-de-milho/400/300",
     "ingredientes": {
       "farinha": "100%",
       "fuba": "20%",
@@ -87,6 +91,7 @@
     "categoria": "Bolos",
     "data": "2009-10-27",
     "descricao": "Receita de bolo mae benta passada em sala de aula.",
+    "image_url": "https://picsum.photos/seed/bolo-mae-benta/400/300",
     "ingredientes": {
       "farinha": "100%",
       "acucar": "75%",
@@ -103,6 +108,7 @@
     "categoria": "Paes",
     "data": "2009-10-28",
     "descricao": "Receita de pao suico passada em sala de aula.",
+    "image_url": "https://picsum.photos/seed/pao-suico/400/300",
     "ingredientes": {
       "farinha": "100%",
       "sal": "2%",
@@ -122,6 +128,7 @@
     "categoria": "Paes",
     "data": "2009-10-29",
     "descricao": "Receita de pao frances passada em sala de aula.",
+    "image_url": "https://picsum.photos/seed/pao-frances/400/300",
     "ingredientes": {
       "farinha": "100%",
       "sal": "2%",
@@ -138,6 +145,7 @@
     "categoria": "Massas",
     "data": "2009-10-29",
     "descricao": "Receita de massa para pizza passada em sala de aula.",
+    "image_url": "https://picsum.photos/seed/massa-pizza/400/300",
     "ingredientes": {
       "farinha": "100%",
       "sal": "2%",
