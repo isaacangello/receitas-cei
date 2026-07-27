@@ -285,12 +285,22 @@ function parseRecipeFromText($text, $filename) {
 }
 
 function fetchRecipeImage($titulo, $categoria) {
-    $searchTerms = [$titulo, $categoria];
-    $searchTerm = implode(' ', $searchTerms);
-    $searchTerm = urlencode($searchTerm);
+    $searchTerm = buildImageSearchQuery($titulo, $categoria);
 
-    // 1. TheMealDB (gratis, sem API key)
-    $mealDbUrl = "https://www.themealdb.com/api/json/v1/1/search.php?s={$searchTerm}";
+    // 1. Unsplash API (melhor relevancia)
+    $unsplashKey = env('UNSPLASH_ACCESS_KEY', '');
+    if (!empty($unsplashKey)) {
+        $encoded = urlencode($searchTerm);
+        $unsplashUrl = "https://api.unsplash.com/search/photos?query={$encoded}&per_page=1&client_id={$unsplashKey}";
+        $unsplashData = fetchUrlExternal($unsplashUrl);
+        if ($unsplashData && isset($unsplashData['results'][0]['urls']['small'])) {
+            return $unsplashData['results'][0]['urls']['small'];
+        }
+    }
+
+    // 2. TheMealDB (gratis, busca por keyword em ingles)
+    $encoded = urlencode($searchTerm);
+    $mealDbUrl = "https://www.themealdb.com/api/json/v1/1/search.php?s={$encoded}";
     $mealData = fetchUrlExternal($mealDbUrl);
     if ($mealData && isset($mealData['meals']) && count($mealData['meals']) > 0) {
         $thumb = $mealData['meals'][0]['strMealThumb'] ?? null;
@@ -299,19 +309,49 @@ function fetchRecipeImage($titulo, $categoria) {
         }
     }
 
-    // 2. Unsplash API (precisa de API key)
-    $unsplashKey = env('UNSPLASH_ACCESS_KEY', '');
-    if (!empty($unsplashKey)) {
-        $unsplashUrl = "https://api.unsplash.com/search/photos?query={$searchTerm}&per_page=1&client_id={$unsplashKey}";
-        $unsplashData = fetchUrlExternal($unsplashUrl);
-        if ($unsplashData && isset($unsplashData['results'][0]['urls']['small'])) {
-            return $unsplashData['results'][0]['urls']['small'];
-        }
-    }
-
     // 3. Picsum (fallback garantido)
     $seed = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($titulo));
     return "https://picsum.photos/seed/{$seed}/400/300";
+}
+
+function buildImageSearchQuery($titulo, $categoria) {
+    $catMap = [
+        'Paes'    => 'bread',
+        'Bolos'   => 'cake',
+        'Broas'   => 'corn bread biscuit',
+        'Massas'  => 'pizza pasta dough',
+        'Doces'   => 'dessert pastry sweet',
+        'Salgados' => 'savory pastry snack',
+        'Outros'  => 'baking homemade food',
+    ];
+
+    $tituloEn = stripAccents(strtolower($titulo));
+    $tituloEn = preg_replace('/[^a-z0-9\s]/', ' ', $tituloEn);
+    $tituloEn = trim(preg_replace('/\s+/', ' ', $tituloEn));
+
+    $catEn = $catMap[$categoria] ?? 'baking';
+
+    if (mb_strlen($tituloEn) > 3) {
+        return $tituloEn;
+    }
+
+    return $catEn;
+}
+
+function stripAccents($str) {
+    $map = [
+        'a' => ['á','à','â','ã','ä','å'],
+        'e' => ['é','è','ê','ë'],
+        'i' => ['í','ì','î','ï'],
+        'o' => ['ó','ò','ô','õ','ö'],
+        'u' => ['ú','ù','û','ü'],
+        'c' => ['ç'],
+        'n' => ['ñ'],
+    ];
+    foreach ($map as $plain => $accents) {
+        $str = str_replace($accents, $plain, $str);
+    }
+    return $str;
 }
 
 function fetchUrlExternal($url) {
