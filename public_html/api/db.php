@@ -81,7 +81,7 @@ switch ($action) {
     case 'export-sql':
         $stmt = $pdo->query("SHOW CREATE TABLE receitas");
         $tableRow = $stmt->fetch();
-        $createStmt = $tableRow['Create Table'];
+        $createBody = $tableRow['Create Table'];
 
         $stmt = $pdo->query("SELECT * FROM receitas ORDER BY data_receita DESC");
         $receitas = $stmt->fetchAll();
@@ -97,7 +97,7 @@ switch ($action) {
         $lines[] = "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';";
         $lines[] = "";
         $lines[] = "DROP TABLE IF EXISTS `receitas`;";
-        $lines[] = "CREATE TABLE `receitas` ($createStmt);";
+        $lines[] = $createBody . ";";
         $lines[] = "";
 
         $columns = ['id','titulo','categoria','data_receita','descricao','ingredientes','total_farinha','modo_preparo','observacoes','image_url','image_search_query'];
@@ -142,12 +142,32 @@ switch ($action) {
         try {
             $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
 
-            $stmts = array_filter(array_map('trim', explode(";\n", $sql)));
+            $lines = explode("\n", $sql);
+            $stmts = [];
+            $current = '';
+
+            foreach ($lines as $line) {
+                $trimmed = trim($line);
+                if ($trimmed === '' || $trimmed[0] === '-') {
+                    if ($current !== '' && strtoupper(substr($current, 0, 3)) === 'SET') {
+                        $stmts[] = $current;
+                        $current = '';
+                    }
+                    continue;
+                }
+                $current .= ' ' . $trimmed;
+                if (substr($trimmed, -1) === ';') {
+                    $stmts[] = trim($current);
+                    $current = '';
+                }
+            }
+            if ($current !== '') $stmts[] = trim($current);
+
             $executed = 0;
             $errors = [];
 
             foreach ($stmts as $stmt) {
-                if ($stmt === '' || $stmt[0] === '-' || strtoupper(substr($stmt, 0, 3)) === 'SET') {
+                if ($stmt === '' || strtoupper(substr($stmt, 0, 3)) === 'SET') {
                     if (strtoupper(substr($stmt, 0, 3)) === 'SET') {
                         try { $pdo->exec($stmt); $executed++; } catch (PDOException $e) {}
                     }
