@@ -224,6 +224,19 @@ Alpine.data('adminApp', () => ({
         })
         result = await parseRes.json()
         if (!parseRes.ok) throw new Error(result.error || 'Erro ao parsear texto')
+      } else if (ext === 'doc') {
+        const arrayBuffer = await file.arrayBuffer()
+        const text = docToText(arrayBuffer)
+        if (!text || !text.trim()) throw new Error('Nenhum texto extraido do .doc')
+
+        const parseRes = await fetch(this.API + '/import.php', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: this.authHeaders(),
+          body: JSON.stringify({ text, filename: file.name }),
+        })
+        result = await parseRes.json()
+        if (!parseRes.ok) throw new Error(result.error || 'Erro ao parsear texto')
       } else {
         const formData = new FormData()
         formData.append('file', file)
