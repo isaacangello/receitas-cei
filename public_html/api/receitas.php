@@ -13,7 +13,11 @@ if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
     requireCsrf($method);
 }
 
-$pdo = getDb();
+try {
+    $pdo = getDb();
+} catch (PDOException $e) {
+    jsonResponse(['error' => 'Banco de dados indisponivel', 'detail' => $e->getMessage()], 503);
+}
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS receitas (
     id VARCHAR(100) PRIMARY KEY,
