@@ -1,5 +1,8 @@
 <?php
+ob_start();
+error_reporting(E_ERROR | E_PARSE);
 require_once __DIR__ . '/config.php';
+ob_end_clean();
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
@@ -48,7 +51,12 @@ $createTableSQL = "CREATE TABLE IF NOT EXISTS receitas (
 function escapeSqlValue($val) {
     if ($val === null) return 'NULL';
     if (is_int($val) || is_float($val)) return $val;
-    return "'" . str_replace("'", "''", $val) . "'";
+    $val = str_replace('\\', '\\\\', $val);
+    $val = str_replace("'", "''", $val);
+    $val = str_replace("\n", '\\n', $val);
+    $val = str_replace("\r", '\\r', $val);
+    $val = str_replace("\0", '', $val);
+    return "'$val'";
 }
 
 switch ($action) {
@@ -131,36 +139,45 @@ switch ($action) {
             jsonResponse(['error' => 'Campo sql obrigatorio'], 400);
         }
 
-        $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+        try {
+            $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
 
-        $stmts = array_filter(array_map('trim', explode(";\n", $sql)));
-        $executed = 0;
-        $errors = [];
+            $stmts = array_filter(array_map('trim', explode(";\n", $sql)));
+            $executed = 0;
+            $errors = [];
 
-        foreach ($stmts as $stmt) {
-            if ($stmt === '' || $stmt[0] === '-') continue;
-            try {
-                $pdo->exec($stmt);
-                $executed++;
-            } catch (PDOException $e) {
-                $short = substr($stmt, 0, 80);
-                $errors[] = "$short... => " . $e->getMessage();
+            foreach ($stmts as $stmt) {
+                if ($stmt === '' || $stmt[0] === '-' || strtoupper(substr($stmt, 0, 3)) === 'SET') {
+                    if (strtoupper(substr($stmt, 0, 3)) === 'SET') {
+                        try { $pdo->exec($stmt); $executed++; } catch (PDOException $e) {}
+                    }
+                    continue;
+                }
+                try {
+                    $pdo->exec($stmt);
+                    $executed++;
+                } catch (PDOException $e) {
+                    $short = substr($stmt, 0, 80);
+                    $errors[] = "$short... => " . $e->getMessage();
+                }
             }
+
+            $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
+
+            $countStmt = $pdo->query("SELECT COUNT(*) as total FROM receitas");
+            $total = $countStmt->fetch()['total'];
+
+            jsonResponse([
+                'success' => true,
+                'action' => 'import-sql',
+                'statements_executed' => $executed,
+                'total_receitas' => $total,
+                'errors' => count($errors),
+                'error_details' => $errors,
+            ]);
+        } catch (Exception $e) {
+            jsonResponse(['error' => 'Erro na importacao: ' . $e->getMessage()], 500);
         }
-
-        $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
-
-        $countStmt = $pdo->query("SELECT COUNT(*) as total FROM receitas");
-        $total = $countStmt->fetch()['total'];
-
-        jsonResponse([
-            'success' => true,
-            'action' => 'import-sql',
-            'statements_executed' => $executed,
-            'total_receitas' => $total,
-            'errors' => count($errors),
-            'error_details' => $errors,
-        ]);
         break;
 
     case 'fresh':
