@@ -35,8 +35,9 @@ if (!$text) {
 $recipe = parseRecipeFromText($text, $filename);
 
 // Buscar imagem automaticamente
-$imageUrl = fetchRecipeImage($recipe['titulo'], $recipe['categoria']);
-$recipe['image_url'] = $imageUrl;
+$imageResult = fetchRecipeImage($recipe['titulo'], $recipe['categoria']);
+$recipe['image_url'] = $imageResult['url'];
+$recipe['image_search_query'] = $imageResult['query'];
 
 jsonResponse([
     'receita' => $recipe,
@@ -284,8 +285,8 @@ function parseRecipeFromText($text, $filename) {
     ];
 }
 
-function fetchRecipeImage($titulo, $categoria) {
-    $searchTerm = buildImageSearchQuery($titulo, $categoria);
+function fetchRecipeImage($titulo, $categoria, $customQuery = null) {
+    $searchTerm = $customQuery ?: buildImageSearchQuery($titulo, $categoria);
 
     // 1. Unsplash API (melhor relevancia)
     $unsplashKey = env('UNSPLASH_ACCESS_KEY', '');
@@ -294,7 +295,7 @@ function fetchRecipeImage($titulo, $categoria) {
         $unsplashUrl = "https://api.unsplash.com/search/photos?query={$encoded}&per_page=1&client_id={$unsplashKey}";
         $unsplashData = fetchUrlExternal($unsplashUrl);
         if ($unsplashData && isset($unsplashData['results'][0]['urls']['small'])) {
-            return $unsplashData['results'][0]['urls']['small'];
+            return ['url' => $unsplashData['results'][0]['urls']['small'], 'query' => $searchTerm, 'source' => 'unsplash'];
         }
     }
 
@@ -305,13 +306,13 @@ function fetchRecipeImage($titulo, $categoria) {
     if ($mealData && isset($mealData['meals']) && count($mealData['meals']) > 0) {
         $thumb = $mealData['meals'][0]['strMealThumb'] ?? null;
         if ($thumb) {
-            return $thumb . '/preview';
+            return ['url' => $thumb . '/preview', 'query' => $searchTerm, 'source' => 'themealdb'];
         }
     }
 
     // 3. Picsum (fallback garantido)
     $seed = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($titulo));
-    return "https://picsum.photos/seed/{$seed}/400/300";
+    return ['url' => "https://picsum.photos/seed/{$seed}/400/300", 'query' => $searchTerm, 'source' => 'picsum'];
 }
 
 function buildImageSearchQuery($titulo, $categoria) {

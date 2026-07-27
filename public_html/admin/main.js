@@ -13,7 +13,7 @@ Alpine.data('adminApp', () => ({
   message: '',
   showForm: false,
   editing: false,
-  form: { id: '', titulo: '', categoria: 'Paes', data: '', descricao: '', ingredientes_json: '{}', modo_preparo: '', observacoes: '', image_url: '' },
+  form: { id: '', titulo: '', categoria: 'Paes', data: '', descricao: '', ingredientes_json: '{}', modo_preparo: '', observacoes: '', image_url: '', image_search_query: '' },
 
   importState: 'idle',
   dragOver: false,
@@ -88,7 +88,7 @@ Alpine.data('adminApp', () => ({
   resetForm() {
     this.editing = false
     this.error = ''
-    this.form = { id: '', titulo: '', categoria: 'Paes', data: '', descricao: '', ingredientes_json: '{}', modo_preparo: '', observacoes: '', image_url: '' }
+    this.form = { id: '', titulo: '', categoria: 'Paes', data: '', descricao: '', ingredientes_json: '{}', modo_preparo: '', observacoes: '', image_url: '', image_search_query: '' }
   },
 
   editReceita(r) {
@@ -104,6 +104,7 @@ Alpine.data('adminApp', () => ({
       modo_preparo: r.modo_preparo || '',
       observacoes: r.observacoes || '',
       image_url: r.image_url || '',
+      image_search_query: r.image_search_query || '',
     }
     this.showForm = true
   },
@@ -127,6 +128,7 @@ Alpine.data('adminApp', () => ({
       modo_preparo: this.form.modo_preparo,
       observacoes: this.form.observacoes,
       image_url: this.form.image_url,
+      image_search_query: this.form.image_search_query,
     }
 
     const method = this.editing ? 'PUT' : 'POST'
@@ -294,6 +296,7 @@ Alpine.data('adminApp', () => ({
       modo_preparo: recipe.modo_preparo,
       observacoes: recipe.observacoes || '',
       image_url: recipe.image_url || '',
+      image_search_query: recipe.image_search_query || '',
     }
   },
 
@@ -339,6 +342,27 @@ Alpine.data('adminApp', () => ({
 
     this.message = `Backup baixado: ${result.total} receitas de ${result.database}`
     setTimeout(() => (this.message = ''), 5000)
+  },
+
+  async searchImage() {
+    const query = this.form.image_search_query
+    if (!query || !query.trim()) {
+      this.error = 'Digite um texto para buscar'
+      return
+    }
+    try {
+      const res = await fetch(this.API + '/images.php?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
+      const data = await res.json()
+      if (data.url) {
+        this.form.image_url = data.url
+        this.message = 'Imagem encontrada: ' + data.source
+        setTimeout(() => (this.message = ''), 3000)
+      } else {
+        this.error = 'Nenhuma imagem encontrada'
+      }
+    } catch (e) {
+      this.error = 'Erro ao buscar imagem: ' + e.message
+    }
   },
 
   async freshDb() {
