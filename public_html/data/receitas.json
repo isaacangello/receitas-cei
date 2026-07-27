@@ -1,0 +1,152 @@
+[
+  {
+    "id": "brioche-rapido",
+    "titulo": "Brioche Rápido",
+    "categoria": "Paes",
+    "data": "2009-10-19",
+    "descricao": "Receita de brioche rapido passada em sala de aula.",
+    "ingredientes": {
+      "esponja": {
+        "farinha": "500g (80%)",
+        "fermento": "50g (8%) - se for seco use 1/3",
+        "ovos": "50g (8%)",
+        "gema": "30g (4,8%)",
+        "agua": "QB (quanto basta)",
+        "acucar": "75g (12%)",
+        "sal": "10g (1,6%)",
+        "margarina": "75g (12%)"
+      },
+      "esponja_reforco": {
+        "farinha": "125g (20%)",
+        "ovos": "1 unidade (50g)",
+        "gema": "1 unidade (30g)"
+      }
+    },
+    "total_farinha": "625g",
+    "modo_preparo": "Caso o fermento seja do tipo seco, comece misturando a farinha e o fermento antes de por a agua, estando o fermento e a farinha bem misturadas, junte os outros ingredientes, faca uma massa homogenea e deixe descansar por aproximadamente 30 minutos. Depois junte o restante da farinha, mais acucar, sal e margarina, e faca uma massa homogenea, nao esqueca da agua! Misture a primeira massa com a segunda e abra a massa com um rolo de pastel ate ficar lisa e homogenea. Depois desse processo todo, enrole a massa como rocambole, e corte em pedacos de aproximadamente 30 gramas, arrume em um tabuleiro sobre o regime 9 por 6. Deixe descansar em um armario fechado ou coberto por um plastico por aproximadamente 90 minutos. Apos descansar leve ao forno por 15 minutos na temperatura de 160 graus.",
+    "observacoes": "Voce pode colocar um recheio antes de enrolar como rocambole!"
+  },
+  {
+    "id": "pao-de-hamburguer",
+    "titulo": "Pao de Hamburguer",
+    "categoria": "Paes",
+    "data": "2009-10-20",
+    "descricao": "Receita de pao de hamburguer passada em sala de aula.",
+    "ingredientes": {
+      "farinha": "100%",
+      "reforcador": "1%",
+      "acucar": "15%",
+      "ovos": "8%",
+      "margarina": "8%",
+      "agua": "53%",
+      "fermento": "6% - se for seco use 1/3"
+    },
+    "modo_preparo": "Coloque todos os ingredientes secos na masseira, em seguida o restante, e deixe bater 5 minutos ou ate a massa ficar lisa. Retire a massa da masseira e coloque em uma mesa untada com oleo, em seguida divida a massa com um aparelho divisor em 30 pedacos, arrume sobre o regime 6 por 5 e deixe descansar no armario por aproximadamente 120 minutos ou ate dobrar de tamanho, apos descansar leve ao forno por 20 minutos a uma temperatura de 180 graus."
+  },
+  {
+    "id": "broa-cachambu",
+    "titulo": "Broa Cachambu (Cavaca)",
+    "categoria": "Broas",
+    "data": "2009-10-22",
+    "descricao": "Receita de broa cachambu, tambem conhecida como cavaca.",
+    "ingredientes": {
+      "farinha": "100%",
+      "fuba": "100%",
+      "acucar": "100%",
+      "fermento_em_po": "5%",
+      "margarina": "60%",
+      "ovos": "30%",
+      "erva_doce": "5%"
+    },
+    "modo_preparo": "Coloque todos os ingredientes em uma bacia, e misture ate a massa ficar lisa e homogenea. Apos arrume sobre o regime 9 por 6 (9 fileiras e seis colunas) em uma bandeja levemente untada com oleo em porcoes de aproximadamente 30 gramas. Leve ao forno por 15 minutos a uma temperatura de 180 graus."
+  },
+  {
+    "id": "broa-de-milho",
+    "titulo": "Broa de Milho",
+    "categoria": "Broas",
+    "data": "2009-10-22",
+    "descricao": "Receita de broa de milho passada em sala de aula.",
+    "ingredientes": {
+      "farinha": "100%",
+      "fuba": "20%",
+      "sal": "1,5%",
+      "acucar": "15%",
+      "erva_doce": "1,5%",
+      "reforcador": "1,5%",
+      "agua": "+/- 35%",
+      "fermento": "5% (ou 1/3 se for fermento seco)",
+      "margarina": "2,5%",
+      "anti_mofo": "0,3%",
+      "ovos": "15%"
+    },
+    "modo_preparo": "Coloque todos os ingredientes secos na masseira e deixe bater por um minuto, em seguida colocar o restante dos ingredientes e deixar bater aproximadamente 5 minutos, ou ate ficar lisa e homogenea. Apos bater divida a massa em dois pedacos de 2 quilos, depois divida esses pedacos em 30 partes. Estando as massas divididas faca bolas e passe na agua ou no fuba, arrume-as em bandejas sobre o regime 6 por 5 (cinco colunas e seis fileiras) levemente untadas com oleo, e deixe descansar por aproximadamente 120 minutos. Apos descansar leve ao forno por 20 minutos a uma temperatura de 180 graus."
+  },
+  {
+    "id": "bolo-mae-benta",
+    "titulo": "Bolo Mae Benta",
+    "categoria": "Bolos",
+    "data": "2009-10-27",
+    "descricao": "Receita de bolo mae benta passada em sala de aula.",
+    "ingredientes": {
+      "farinha": "100%",
+      "acucar": "75%",
+      "margarina": "35%",
+      "fermento_em_po": "5%",
+      "ovos": "60%",
+      "leite_liquido": "50%"
+    },
+    "modo_preparo": "Coloque em uma batedeira a margarina e acucar, e deixe bater mais ou menos 15 minutos ou ate a massa fique com um aspecto de creme, diminua a velocidade da batedeira coloque o restante dos ingredientes deixando o leite por ultimo, apos este processo aumente a velocidade da batedeira e deixe bater por mais 5 minutos. Estando a massa pronta use um saco de confeitar para colocar a massa em formas de papel de numero 0 (zero), depois leve ao forno por mais ou menos 15 minutos a uma temperatura de 180 graus."
+  },
+  {
+    "id": "pao-suico",
+    "titulo": "Pao Suico",
+    "categoria": "Paes",
+    "data": "2009-10-28",
+    "descricao": "Receita de pao suico passada em sala de aula.",
+    "ingredientes": {
+      "farinha": "100%",
+      "sal": "2%",
+      "acucar": "10%",
+      "reforcador": "1%",
+      "fermento": "6%",
+      "margarina": "6%",
+      "ovos": "8%",
+      "agua": "54%"
+    },
+    "modo_preparo": "Coloque todos os ingredientes secos na masseira e deixe bater por um minuto, depois de bater coloque o restante dos ingredientes e deixe bater por mais 5 minutos ou ate ficar lisa e homogenea. Terminado este processo coloque a massa em uma mesa untada com oleo e divida em pedacos de dois quilos e depois divida a massa novamente em 30 pedacos, modele e arrume em uma bandeja sobre o regime 10 por 3 (3 colunas e 10 fileiras), ja arrumado deixe descansar em um armario, ou coberto com um pano ou saco plastico por mais ou menos 120 minutos. Apos descansar leve ao forno mais ou menos 20 minutos a uma temperatura de 180 graus.",
+    "observacoes": "Pinte com gema de ovo a meio crescimento."
+  },
+  {
+    "id": "pao-frances",
+    "titulo": "Pao Frances",
+    "categoria": "Paes",
+    "data": "2009-10-29",
+    "descricao": "Receita de pao frances passada em sala de aula.",
+    "ingredientes": {
+      "farinha": "100%",
+      "sal": "2%",
+      "reforcador": "1%",
+      "fermento": "3%",
+      "agua": "53%"
+    },
+    "modo_preparo": "Coloque na masseira todos os ingredientes secos deixe bater por 2 minutos, apos bater coloque o restante dos ingredientes e deixe bater mais 5 minutos ou ate ficar lisa e homogenea, depois de bater coloque a massa em uma mesa untada com oleo e corte em pedacos de 2 quilos, apos corte e modele a massa para por nas formas para pao frances (graves) com as costuras voltadas para baixo e deixe descansar por mais ou menos 120 minutos, apos o tempo adequado de descanso leve ao forno por mais ou menos 15 minutos com vapor.",
+    "observacoes": "Para uma boa aparencia do pao filete com gilete antes de levar ao forno."
+  },
+  {
+    "id": "massa-pizza",
+    "titulo": "Massa para Pizza",
+    "categoria": "Massas",
+    "data": "2009-10-29",
+    "descricao": "Receita de massa para pizza passada em sala de aula.",
+    "ingredientes": {
+      "farinha": "100%",
+      "sal": "2%",
+      "acucar": "2%",
+      "margarina": "3%",
+      "fermento": "3%",
+      "ovos": "2%",
+      "agua": "58%"
+    },
+    "modo_preparo": "Coloque todos os ingredientes secos na masseira e deixe bater por 1 minuto, depois de bater coloque o restante dos ingredientes e deixe bater novamente por mais 5 minutos ou ate a massa ficar lisa e homogenea, estando a massa lisa e homogenea retire da masseira e coloque sobre uma mesa levemente untada com oleo e corte em pedacos de acordo com a bandeja que sera usada para levar a massa ao forno, modele e fure com um garfo, e deixe descansar por mais ou menos 90 minutos, apos descansar leve ao forno por 4 minutos a uma temperatura de 180 graus, retire embale e guarde."
+  }
+]

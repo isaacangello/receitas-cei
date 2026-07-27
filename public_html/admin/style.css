@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #8B4513;
+  --color-primary-light: #A0522D;
+  --color-primary-dark: #6B3410;
+  --color-accent: #D2691E;
+  --color-cream: #FFF8DC;
+  --color-warm-gray: #F5F0EB;
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #D2691E;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.dropzone {
+  transition: border-color 0.2s, background-color 0.2s, transform 0.15s;
+}
+
+.dropzone:active {
+  transform: scale(0.99);
+}

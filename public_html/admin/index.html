@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Receitas CEI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/admin-BFhpiz_S.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/module.esm-BtRUP2rk.js">
+  <link rel="stylesheet" crossorigin href="/assets/admin-Cz8wODdg.css">
+</head>
+<body class="bg-warm-gray min-h-screen font-body" x-data="adminApp">
+
+  <!-- Login -->
+  <div x-show="!authenticated" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+      <h1 class="font-display text-2xl font-bold text-primary text-center mb-2">Receitas CEI</h1>
+      <p class="text-center text-gray-500 text-sm mb-6">Painel Administrativo</p>
+      <div x-show="error" x-transition class="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm" x-text="error"></div>
+      <form @submit.prevent="login" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Chave de acesso</label>
+          <input type="password" x-model="key"
+            placeholder="Digite sua chave"
+            autocomplete="current-password"
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all">
+        </div>
+        <button type="submit"
+          class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-lg transition-colors">
+          Entrar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div x-show="authenticated" class="max-w-6xl mx-auto px-4 py-8">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="font-display text-3xl font-bold text-primary">Gerenciar Receitas</h1>
+        <p class="text-sm text-gray-500 mt-1">
+          <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>
+          Conectado
+        </p>
+      </div>
+      <div class="flex gap-3">
+        <a href="/" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors">
+          Ver Site
+        </a>
+        <button @click="showForm = true; resetForm()"
+          class="bg-accent hover:bg-primary text-white font-bold py-2 px-4 rounded-lg transition-colors">
+          + Nova Receita
+        </button>
+        <button @click="logout()"
+          class="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg transition-colors">
+          Sair
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div x-show="message" x-transition class="bg-green-50 text-green-700 p-3 rounded-lg mb-4 text-sm flex items-center gap-2">
+      <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+      <span x-text="message"></span>
+    </div>
+    <div x-show="error" x-transition class="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm flex items-center gap-2">
+      <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      <span x-text="error"></span>
+    </div>
+
+    <!-- Import Section: Dropzone + File Input -->
+    <div x-show="importState === 'idle'" class="mb-6" x-transition>
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="font-display text-xl font-bold text-primary mb-4">Importar Receita</h2>
+
+        <!-- Dropzone -->
+        <div class="dropzone rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-all"
+          :class="dragOver ? 'border-accent bg-accent/5 scale-[1.01]' : 'border-gray-300 hover:border-accent hover:bg-gray-50'"
+          @dragover.prevent="onDragOver($event)"
+          @dragleave.prevent="onDragLeave()"
+          @drop.prevent="onDrop($event)"
+          @click="$refs.fileInput.click()">
+
+          <svg class="w-12 h-12 mx-auto mb-3 transition-colors" :class="dragOver ? 'text-accent' : 'text-gray-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
+
+          <p class="text-gray-700 font-semibold">
+            <span x-show="!dragOver">Arraste o arquivo aqui</span>
+            <span x-show="dragOver" class="text-accent">Solte o arquivo!</span>
+          </p>
+          <p class="text-sm text-gray-400 mt-1">ou clique para selecionar</p>
+
+          <div class="mt-4 flex items-center justify-center gap-3">
+            <span class="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded">.doc</span>
+            <span class="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded">.docx</span>
+            <span class="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded">.txt</span>
+            <span class="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded">.md</span>
+            <span class="text-gray-300 text-xs">max 5MB</span>
+          </div>
+        </div>
+
+        <input type="file" x-ref="fileInput" class="hidden"
+          accept=".doc,.docx,.txt,.md"
+          @change="onFileSelect($event)">
+
+        <!-- Import error -->
+        <div x-show="importError" x-transition class="mt-3 bg-red-50 text-red-700 p-3 rounded-lg text-sm" x-text="importError"></div>
+      </div>
+    </div>
+
+    <!-- Import State: Extracting -->
+    <div x-show="importState === 'extracting'" class="mb-6" x-transition>
+      <div class="bg-white rounded-2xl shadow-lg p-6 text-center">
+        <div class="spinner mx-auto mb-3"></div>
+        <p class="text-gray-600 font-medium">Extraindo texto do arquivo...</p>
+        <p class="text-sm text-gray-400 mt-1" x-text="importFile?.name || ''"></p>
+      </div>
+    </div>
+
+    <!-- Import State: Preview -->
+    <div x-show="importState === 'preview'" class="mb-6" x-transition>
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-display text-xl font-bold text-primary">Preview da Importacao</h2>
+          <button @click="cancelImport()" class="text-gray-400 hover:text-red-500 transition-colors" title="Cancelar">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Recipe preview cards -->
+        <div class="grid grid-cols-2 gap-3 mb-4" x-show="importRecipe">
+          <div class="bg-cream rounded-lg p-3">
+            <span class="text-xs text-gray-500 uppercase tracking-wide">Titulo</span>
+            <p class="font-medium text-gray-800" x-text="importRecipe?.titulo"></p>
+          </div>
+          <div class="bg-cream rounded-lg p-3">
+            <span class="text-xs text-gray-500 uppercase tracking-wide">Categoria</span>
+            <p class="font-medium text-gray-800" x-text="importRecipe?.categoria"></p>
+          </div>
+          <div class="bg-cream rounded-lg p-3">
+            <span class="text-xs text-gray-500 uppercase tracking-wide">ID</span>
+            <p class="font-mono text-sm text-gray-800" x-text="importRecipe?.id"></p>
+          </div>
+          <div class="bg-cream rounded-lg p-3">
+            <span class="text-xs text-gray-500 uppercase tracking-wide">Data</span>
+            <p class="font-medium text-gray-800" x-text="importRecipe?.data || 'N/A'"></p>
+          </div>
+        </div>
+
+        <!-- Ingredientes preview -->
+        <div x-show="importRecipe?.ingredientes && Object.keys(importRecipe?.ingredientes || {}).length > 0" class="mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 mb-2">Ingredientes detectados:</h3>
+          <div class="bg-gray-50 rounded-lg p-3 text-sm">
+            <template x-for="(val, key) in importRecipe?.ingredientes || {}" :key="key">
+              <div class="flex justify-between py-1 border-b border-gray-200 last:border-0">
+                <span class="text-gray-700 capitalize" x-text="key.replace(/_/g, ' ')"></span>
+                <span class="text-gray-500 font-mono" x-text="val"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Modo de preparo preview -->
+        <div x-show="importRecipe?.modo_preparo" class="mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 mb-2">Modo de preparo:</h3>
+          <p class="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 leading-relaxed max-h-32 overflow-y-auto" x-text="importRecipe?.modo_preparo"></p>
+        </div>
+
+        <!-- Raw text (collapsible) -->
+        <details class="mb-4">
+          <summary class="text-sm text-gray-500 cursor-pointer hover:text-gray-700 transition-colors">
+            Ver texto original extraido
+          </summary>
+          <pre class="bg-gray-50 rounded-lg p-3 text-xs text-gray-600 mt-2 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono" x-text="importPreview"></pre>
+        </details>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3">
+          <button @click="cancelImport()"
+            class="px-5 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition-colors">
+            Cancelar
+          </button>
+          <button @click="confirmImport()"
+            class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-bold transition-colors">
+            Importar e Editar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recipe List -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="font-display text-lg font-bold text-primary">
+          Receitas
+          <span class="text-sm font-normal text-gray-400 ml-1" x-text="'(' + receitas.length + ')'"></span>
+        </h2>
+      </div>
+      <table class="w-full">
+        <thead class="bg-cream">
+          <tr>
+            <th class="text-left px-6 py-3 font-semibold text-gray-700 text-sm">Titulo</th>
+            <th class="text-left px-6 py-3 font-semibold text-gray-700 text-sm">Categoria</th>
+            <th class="text-left px-6 py-3 font-semibold text-gray-700 text-sm">Data</th>
+            <th class="text-right px-6 py-3 font-semibold text-gray-700 text-sm">Acoes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="r in receitas" :key="r.id">
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4">
+                <span class="font-medium text-gray-800" x-text="r.titulo"></span>
+                <span class="block text-xs text-gray-400 font-mono" x-text="r.id"></span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-block px-2 py-0.5 bg-cream text-primary text-xs font-medium rounded-full" x-text="r.categoria"></span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500" x-text="r.data_receita || r.data || '-'"></td>
+              <td class="px-6 py-4 text-right">
+                <button @click="editReceita(r)" class="text-accent hover:text-primary text-sm font-medium mr-3 transition-colors">Editar</button>
+                <button @click="deleteReceita(r.id)" class="text-red-400 hover:text-red-600 text-sm font-medium transition-colors">Excluir</button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <div x-show="receitas.length === 0" class="p-12 text-center text-gray-400">
+        <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        <p class="font-medium">Nenhuma receita encontrada</p>
+        <p class="text-sm mt-1">Importe um arquivo ou crie uma receita manualmente</p>
+      </div>
+    </div>
+
+    <!-- Edit/Create Modal -->
+    <div x-show="showForm" x-transition.opacity class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" @click.self="showForm = false">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" @click.stop>
+        <div class="sticky top-0 bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between rounded-t-2xl">
+          <h2 class="font-display text-xl font-bold text-primary" x-text="editing ? 'Editar Receita' : 'Nova Receita'"></h2>
+          <button @click="showForm = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="p-8 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">ID (slug)</label>
+            <input type="text" x-model="form.id" :disabled="editing"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500"
+              placeholder="ex: bolo-de-chocolate">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Titulo *</label>
+              <input type="text" x-model="form.titulo"
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
+              <select x-model="form.categoria"
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all">
+                <option value="Paes">Paes</option>
+                <option value="Bolos">Bolos</option>
+                <option value="Broas">Broas</option>
+                <option value="Massas">Massas</option>
+                <option value="Doces">Doces</option>
+                <option value="Salgados">Salgados</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+              <input type="date" x-model="form.data"
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Descricao</label>
+              <input type="text" x-model="form.descricao"
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ingredientes (JSON)</label>
+            <textarea x-model="form.ingredientes_json" rows="6"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none font-mono text-sm transition-all"
+              placeholder='{"farinha": "100%", "acucar": "15%"}'></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Modo de Preparo</label>
+            <textarea x-model="form.modo_preparo" rows="5"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Observacoes</label>
+            <textarea x-model="form.observacoes" rows="2"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"></textarea>
+          </div>
+        </div>
+        <div class="sticky bottom-0 bg-white border-t border-gray-100 px-8 py-4 flex justify-end gap-3 rounded-b-2xl">
+          <button @click="showForm = false"
+            class="px-5 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition-colors">
+            Cancelar
+          </button>
+          <button @click="saveReceita()"
+            class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-bold transition-colors">
+            <span x-text="editing ? 'Atualizar' : 'Criar Receita'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
