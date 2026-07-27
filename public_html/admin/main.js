@@ -365,6 +365,25 @@ Alpine.data('adminApp', () => ({
     }
   },
 
+  async searchImportImage() {
+    const query = this.importRecipe?.image_search_query
+    if (!query || !query.trim()) {
+      this.importError = 'Digite um texto para buscar'
+      return
+    }
+    try {
+      const res = await fetch(this.API + '/images.php?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
+      const data = await res.json()
+      if (data.url) {
+        this.importRecipe.image_url = data.url
+      } else {
+        this.importError = 'Nenhuma imagem encontrada'
+      }
+    } catch (e) {
+      this.importError = 'Erro ao buscar imagem: ' + e.message
+    }
+  },
+
   async freshDb() {
     if (!confirm('ATENCAO: Isso vai APAGAR TODAS as receitas do banco e importar as receitas do JSON inicial. Continuar?')) return
     const result = await this.dbAction('fresh')
