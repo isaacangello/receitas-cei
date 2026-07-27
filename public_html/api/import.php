@@ -138,11 +138,21 @@ function extractDocText($path) {
             if ($result && trim($result)) {
                 $text = $result;
             } else {
-                $result = @shell_exec("strings $escaped 2>/dev/null");
-                if ($result) {
-                    $lines = preg_filter('/^\s*$/D', '', explode("\n", $result));
-                    $text = implode("\n", $lines);
+                $tmpOut = tempnam(sys_get_temp_dir(), 'doc2txt');
+                @shell_exec("soffice --headless --convert-to txt:Text --outdir " . escapeshellarg(sys_get_temp_dir()) . " $escaped 2>/dev/null");
+                $basename = pathinfo($path, PATHINFO_FILENAME) . '.txt';
+                $txtPath = sys_get_temp_dir() . '/' . $basename;
+                if (file_exists($txtPath) && ($result = file_get_contents($txtPath)) && trim($result)) {
+                    $text = $result;
+                    @unlink($txtPath);
+                } else {
+                    $result = @shell_exec("strings $escaped 2>/dev/null");
+                    if ($result) {
+                        $lines = preg_filter('/^\s*$/D', '', explode("\n", $result));
+                        $text = implode("\n", $lines);
+                    }
                 }
+                @unlink($tmpOut);
             }
         }
     }
