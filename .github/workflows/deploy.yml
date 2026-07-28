@@ -30,15 +30,14 @@ jobs:
           DOTENV: ${{ secrets.DOTENV }}
         run: |
           sudo apt-get install -y lftp
-          printf '%s\n' "$DOTENV" > env_tmp
-          echo "env_tmp size: $(wc -c < env_tmp) bytes"
-          ls -la env_tmp
+          printf '%s\n' "$DOTENV" > /tmp/env_tmp
           lftp -c "
             set ftp:ssl-allow no;
-            set ftp:chmod '';
+            set ftp:chmod-default '';
             open ftp://${{ secrets.FTP_USER }}:${{ secrets.FTP_PASS }}@${{ secrets.FTP_HOST }};
             mirror --reverse --delete --verbose --no-perms --exclude .env public_html/ /htdocs/;
-            put env_tmp -o .env;
-            ls -la /htdocs/.env;
+            cd /htdocs
+            put /tmp/env_tmp -o .env;
+            ls -la .env;
             quit
           "
