@@ -30,6 +30,7 @@ jobs:
           sudo apt-get install -y lftp
           lftp -c "
             set ftp:ssl-allow no;
+            set ftp:chmod no;
             open ftp://${{ secrets.FTP_USER }}:${{ secrets.FTP_PASS }}@${{ secrets.FTP_HOST }};
             mirror --reverse --delete --verbose public_html/ /htdocs/;
             quit
