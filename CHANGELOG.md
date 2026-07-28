@@ -2,6 +2,36 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-28
+
+### Node.js Import Script (`scripts/import.mjs`)
+- Script CLI para importacao de arquivos `.doc` via Node.js (sem LibreOffice)
+- Usa `docToText.js` via `vm.runInContext` para extrair texto de `.doc` em contexto ESM
+- Suporta `--dry-run`, `--file`, `--dir` para testes parciais
+- Conexao direta com MySQL via `mysql2/promise`
+- Limpa DB automaticamente antes de importar (com aviso)
+- Batch com 41 receitas importadas em ~5s
+
+### Multi-Receita (Sub-Grupos)
+- Parser detecta multi-listas de ingredientes (ex: Pão doce + Creme, Panetone esponja + reforço)
+- Sub-grupos extraídos de markers `ingredientes* para <nome>` (ex: "primeira-parte", "segunda-parte")
+- Headers entre blocos (`Receita complementar`, `Creme para...`) usados como nomes de sub-grupos
+- Metadata (datas, "Receita passada") automaticamente ignorada nos headers
+- Resultado JSON aninhado: `{"pao-doce": {...}, "creme-para-pao-doce": {...}}`
+- Sub-grupos só ativados quando há 2+ blocos COM ingredientes (evita falsos positivos de OBSERVAÇÃO)
+
+### Parser - Novos Formatos Suportados
+- Tab-separated completo: `Farinha\t100%\t5000\tg` (7 de 41 receitas usam este formato)
+- `+/- 35%` e `5% (ou 1/3 se for fermento seco)` — percentuais com prefixo/sufixo extra
+- Linhas sem marker `ingredientes` — auto-detecção quando há TABs com números (ex: Quindim)
+- Filtro de valores `_______` (underline-only) em campos de ingredientes
+- `Modo de preparo.` com ponto final — regex agora aceita pontuação
+
+### Correções do Parser PHP (import.php)
+- `parseSections()` reescrita com lógica de blocos para suportar multi-receita
+- `parseIngredientLineFromText()` lida com `NameNN%` e `Name = NN%` sem tabs
+- `cleanWikiMarkup()` limpa `<nowiki>=</nowiki>`, `'''bold'''`, `= heading =`
+
 ### Bug Fixes
 - SQL dump de backup tinha `)` extra na linha do CREATE TABLE, causando erro 1064 no import
 - `receitas.php` agora retorna JSON quando tabela nao existe em vez de HTML fatal error
@@ -10,13 +40,12 @@
 - Export SQL: removido bug de CREATE TABLE duplicado
 - Import SQL: parser multi-linha corrigido para acumular statementes ate `;`
 - Import SQL: escapar newlines e null bytes no escapeSqlValue()
-- Parser de ingredientes: agora lida com formato `NameNN%` (nome+porcentao colados) e wiki markup `<nowiki>=</nowiki>`
-- Parser: limpeza de wiki markup (`'''bold'''`, `= heading =`) em ingredientes e titulos
 - batch-import.php: corrigido `use` em funcao normal para `global`
-- Re-importacao completa: 40 receitas dos .doc originais com 100% ingredientes parseados (antes 11/47)
+- Re-importacao completa: 41 receitas dos .doc originais com 100% ingredientes parseados (antes 11/47)
 
-### Known Issues
-- Multi-listas de ingredientes (ex: Panetone: massa esponja + massa de reforco) se sobrescrevem — ingredientes da ultima lista sobrepoe os da primeira
+### Conhecido
+- Quindim de coco fresco: ingrediente "Coco Fresco" parseado como `coco-fresco` (valor correto)
+- Acentos preservados corretamente via `docToText.js` (UTF-8 nativo)
 
 ## [0.2.0] - 2026-07-27
 

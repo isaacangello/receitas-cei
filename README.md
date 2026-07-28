@@ -26,13 +26,29 @@ Para melhor deteccao dos ingredientes, formate os arquivos `.doc`/`.docx` com TA
 
 ### Gerenciamento do banco de dados
 
-O painel administrativo oferece 3 acoes para o banco de dados:
+O painel administrativo oferece 4 acoes para o banco de dados:
 
 | Botao | Funcao |
 |-------|--------|
 | **Criar/Banco** | Cria a tabela `receitas` e importa as receitas do JSON inicial se a tabela estiver vazia |
-| **Backup** | Baixa um arquivo JSON com todas as receitas do banco |
+| **Backup** | Baixa um dump SQL com todas as receitas |
+| **Restaurar** | Importa um dump SQL (auto-cria tabela) |
 | **Resetar** | Apaga todas as receitas e reimporta do JSON inicial |
+
+### Importacao em lote via Node.js
+
+Para importar todos os `.doc` de uma vez via CLI:
+
+```bash
+# Testar sem escrever no DB
+node scripts/import.mjs --dry-run
+
+# Importar todos os .doc do diretorio padrao
+node scripts/import.mjs
+
+# Importar arquivo especifico
+node scripts/import.mjs --file "09_11_2009_pao_doce.doc"
+```
 
 ### API
 
@@ -49,7 +65,9 @@ Endpoints da API PHP (em `public_html/api/`):
 | `/api/receitas.php` | PUT | Atualiza uma receita |
 | `/api/receitas.php` | DELETE | Exclui uma receita |
 | `/api/import.php` | POST | Importa receita de texto extraido |
-| `/api/db.php` | POST | Gerencia o banco (setup, backup, fresh) |
+| `/api/images.php` | GET | Busca imagens (Unsplash/MealDB/Picsum) |
+| `/api/db.php` | POST | Gerencia o banco (setup, backup, restore, fresh) |
+| `/api/batch-import.php` | POST | Importacao em lote via API |
 
 ### Seguranca
 
@@ -65,7 +83,8 @@ Endpoints da API PHP (em `public_html/api/`):
 - **Backend:** PHP 8 (API REST)
 - **Banco:** MySQL 8
 - **Build:** [Vite](https://vitejs.dev/)
-- **Deploy:** InfinityFree (FTP)
+- **Import CLI:** Node.js + `docToText.js` + `mysql2`
+- **Deploy:** InfinityFree (FTP) via GitHub Actions
 
 ## Estrutura do projeto
 
@@ -73,12 +92,12 @@ Endpoints da API PHP (em `public_html/api/`):
 receitas-cei/
 ├── public_html/              # Document root (producao e dev)
 │   ├── index.html            # SPA principal
+│   ├── favicon-circle.png    # Favicon circular (PNG)
 │   ├── css/style.css         # Tema TailwindCSS
 │   ├── js/
 │   │   ├── app.js            # Alpine.js stores (router + receitas)
-│   │   ├── parse-recipe.js   # Parser de receitas (port do bash script)
-│   │   ├── docToText.js      # Extrator de texto .doc (JSDoc, 0BSD)
-│   │   └── parse-recipe.js   # Parser de receitas
+│   │   ├── parse-recipe.js   # Parser de receitas (client-side)
+│   │   └── docToText.js      # Extrator de texto .doc (JSDoc, 0BSD)
 │   ├── admin/
 │   │   ├── index.html        # Painel administrativo
 │   │   ├── main.js           # Logica do admin (import, CRUD, DB)
@@ -91,7 +110,12 @@ receitas-cei/
 │       ├── csrf.php          # Token CSRF
 │       ├── receitas.php      # CRUD de receitas
 │       ├── import.php        # Parse de texto -> receita
-│       └── db.php            # Gerenciamento do banco
+│       ├── images.php        # Busca de imagens (Unsplash/MealDB/Picsum)
+│       ├── batch-import.php  # Importacao em lote via API
+│       └── db.php            # Gerenciamento do banco (backup/restore/reset)
+├── scripts/
+│   └── import.mjs            # Import .doc via Node.js (docToText + mysql2)
+├── sqls/                     # Backups SQL
 ├── .env                      # Credenciais (nao versionado)
 ├── .env.example              # Template do .env
 ├── .gitignore
@@ -143,7 +167,7 @@ O site fica disponivel em `http://localhost:3000` e a API em `http://localhost:8
 
 ### Deploy
 
-O deploy e feito via FTP para a InfinityFree usando GitHub Actions. Ao fazer push na branch `main`, o workflow:
+O deploy e feito via FTP para a InfinityFree usando GitHub Actions. O workflow dispara ao criar uma **tag** (`v*`) ou manualmente via `workflow_dispatch`:
 
 1. Instala as dependencias
 2. Roda `npm run build`
