@@ -11,6 +11,7 @@ Substitui o projeto antigo em `pao.50webs.org`.
 - **Banco:** MySQL (InfinityFree: `sql202.infinityfree.com`, `if0_42505744_receitas`)
 - **Deploy:** FTP via GitHub Actions para InfinityFree (`ftpupload.net`)
 - **URL:** `https://receitas.free.nf`
+- **Versão:** v1.1.1
 - **Template visual:** Chef's Kitchen (ThemeWagon)
 
 ## Estrutura do Projeto
@@ -91,11 +92,15 @@ receitas-cei/
 ## Deploy
 - Push de tag `v*` ou `workflow_dispatch` dispara GitHub Actions
 - Build: `npm run build`
-- Deploy: mirror `public_html/` via FTP para `ftpupload.net` (lftp com `set ftp:chmod ''` e `--no-perms` — InfinityFree nao aceita CHMOD)
-- Credenciais no `.env` (FTP_HOST, FTP_USERNAME, FTP_PASSWORD)
-- **GitHub Secrets:** `FTP_HOST`, `FTP_USER`, `FTP_PASS` (configurados via `gh secret set`)
-- `public_html/assets/` e gitignored (build output do Vite)
-- HTML source e build target no mesmo local (`public_html/`)
+- Deploy: mirror `public_html/` via FTP para `ftpupload.net`
+- InfinityFree não aceita CHMOD — lftp com `set ftp:chmod-default ''` e `--no-perms`
+- `.env` é gerado do secret `DOTENV` via `printf '%s\n' "$DOTENV" > /tmp/env_tmp; put /tmp/env_tmp -o .env` dentro de `cd /htdocs`
+- `--exclude .env` no mirror evita deletar o `.env` existente
+- `.htaccess` em `public_html/` bloqueia acesso HTTP ao `.env`
+
+## GitHub Secrets
+- `FTP_HOST`, `FTP_USER`, `FTP_PASS` — credenciais FTP
+- `DOTENV` — conteúdo do `.env` (DB_HOST, DB_NAME, DB_USERNAME, DB_PASSWORD, ADMIN_KEY, UNSPLASH_ACCESS_KEY)
 
 ## Projeto Antigo
 - `/home/isaacca/hd/Codigos/site_pessoal/pao.50webs.org`

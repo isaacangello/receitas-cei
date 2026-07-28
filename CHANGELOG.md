@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-07-28
+
+### Deploy: .env via GitHub Secret
+- `DOTENV` secret criado no GitHub com credenciais de produção (DB, ADMIN_KEY, UNSPLASH_ACCESS_KEY)
+- Deploy gera `.env` em `htdocs/.env` a partir do secret, resolvendo falta de suporte a env vars na InfinityFree
+- `.htaccess` bloqueia acesso HTTP ao `.env`
+- `lftp put` corrigido para usar `cd /htdocs` antes do upload (evita upload para home, bloqueado pela InfinityFree)
+- `set ftp:chmod ''` substituído por `set ftp:chmod-default ''` (elimina warning)
+
+### Bug Fixes
+- `echo "$DOTENV"` substituído por `printf '%s\n' "$DOTENV"` para preservar quebras de linha
+- `config.php` revertido para credenciais vazias (produção carregadas do `.env`)
+
 ## [1.1.0] - 2026-07-28
 
 ### Node.js Import Script (`scripts/import.mjs`)
