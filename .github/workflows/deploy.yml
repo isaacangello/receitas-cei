@@ -26,11 +26,11 @@ jobs:
           NODE_ENV: production
 
       - name: Deploy via FTP
+        env:
+          DOTENV: ${{ secrets.DOTENV }}
         run: |
           sudo apt-get install -y lftp
-          cat > env_tmp << 'ENVEOF'
-          ${{ secrets.DOTENV }}
-          ENVEOF
+          echo "$DOTENV" > env_tmp
           lftp -c "
             set ftp:ssl-allow no;
             set ftp:chmod '';
