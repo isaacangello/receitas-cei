@@ -49,9 +49,9 @@ define('DB_HOST', $isLocal ? env('DB_LOCAL_HOST', '127.0.0.1') : env('DB_HOST', 
 define('DB_PORT', $isLocal ? env('DB_LOCAL_PORT', '3306') : '3306');
 define('DB_NAME', $isLocal ? env('DB_LOCAL_DATABASE') : env('DB_NAME', 'if0_42505744_receitas'));
 define('DB_USERNAME', $isLocal ? env('DB_LOCAL_USERNAME') : env('DB_USERNAME', 'if0_42505744'));
-define('DB_PASSWORD', $isLocal ? env('DB_LOCAL_PASSWORD', '') : env('DB_PASSWORD', 'Apj1Tx0lbQOfL'));
+define('DB_PASSWORD', $isLocal ? env('DB_LOCAL_PASSWORD', '') : env('DB_PASSWORD', ''));
 define('IS_LOCAL', $isLocal);
-define('ADMIN_KEY', env('ADMIN_KEY', 'receitas-cei-2009'));
+define('ADMIN_KEY', env('ADMIN_KEY', ''));
 
 define('MAX_FILE_SIZE', 5 * 1024 * 1024);
 define('ALLOWED_EXTENSIONS', ['doc', 'docx', 'txt', 'md']);
