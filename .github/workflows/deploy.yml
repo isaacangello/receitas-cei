@@ -28,11 +28,14 @@ jobs:
       - name: Deploy via FTP
         run: |
           sudo apt-get install -y lftp
+          cat > env_tmp << 'ENVEOF'
+          ${{ secrets.DOTENV }}
+          ENVEOF
           lftp -c "
             set ftp:ssl-allow no;
             set ftp:chmod '';
-            set net:limit-rate 0;
             open ftp://${{ secrets.FTP_USER }}:${{ secrets.FTP_PASS }}@${{ secrets.FTP_HOST }};
-            mirror --reverse --delete --verbose --no-perms public_html/ /htdocs/;
+            mirror --reverse --delete --verbose --no-perms --exclude .env public_html/ /htdocs/;
+            put env_tmp -o .env;
             quit
           "
