@@ -140,6 +140,7 @@ switch ($action) {
         }
 
         try {
+            $pdo->exec($createTableSQL);
             $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
 
             $lines = explode("\n", $sql);
