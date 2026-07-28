@@ -1,5 +1,23 @@
 # Changelog — Receitas CEI
 
+## [Unreleased]
+
+### Bug Fixes
+- SQL dump de backup tinha `)` extra na linha do CREATE TABLE, causando erro 1064 no import
+- `receitas.php` agora retorna JSON quando tabela nao existe em vez de HTML fatal error
+- `import-sql` auto-cria tabela antes de executar INSERTs (nao precisa clicar "Criar/Banco" antes)
+- `ob_start/ob_end_clean` em receitas.php e db.php para suprimir warnings do config.php
+- Export SQL: removido bug de CREATE TABLE duplicado
+- Import SQL: parser multi-linha corrigido para acumular statementes ate `;`
+- Import SQL: escapar newlines e null bytes no escapeSqlValue()
+- Parser de ingredientes: agora lida com formato `NameNN%` (nome+porcentao colados) e wiki markup `<nowiki>=</nowiki>`
+- Parser: limpeza de wiki markup (`'''bold'''`, `= heading =`) em ingredientes e titulos
+- batch-import.php: corrigido `use` em funcao normal para `global`
+- Re-importacao completa: 40 receitas dos .doc originais com 100% ingredientes parseados (antes 11/47)
+
+### Known Issues
+- Multi-listas de ingredientes (ex: Panetone: massa esponja + massa de reforco) se sobrescrevem — ingredientes da ultima lista sobrepoe os da primeira
+
 ## [0.2.0] - 2026-07-27
 
 ### Estrutura: Separar Backend do Frontend

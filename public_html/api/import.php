@@ -73,6 +73,15 @@ function slugify($text) {
     return trim($text, '-');
 }
 
+function cleanWikiMarkup($line) {
+    $line = str_replace('<nowiki>=</nowiki>', '=', $line);
+    $line = str_replace('<nowiki></nowiki>', '', $line);
+    $line = preg_replace("/'+/", '', $line);
+    $line = preg_replace('/^=\s*/', '', $line);
+    $line = preg_replace('/\s*=\s*$/', '', $line);
+    return trim($line);
+}
+
 function parseIngredientLine($line) {
     $line = trim($line);
     if ($line === '') return null;
@@ -80,46 +89,94 @@ function parseIngredientLine($line) {
     $tabs = preg_split('/\t+/', $line);
     $tabs = array_values(array_filter($tabs, function ($t) { return trim($t) !== ''; }));
 
-    if (empty($tabs)) return null;
+    if (count($tabs) > 1) {
+        $name = trim($tabs[0]);
+        $pct = '';
+        $qty = '';
+        $unit = '';
 
-    $name = trim($tabs[0]);
-    $pct = '';
-    $qty = '';
-    $unit = '';
+        for ($i = 1; $i < count($tabs); $i++) {
+            $val = trim($tabs[$i]);
+            $valNorm = str_replace(',', '.', $val);
 
-    for ($i = 1; $i < count($tabs); $i++) {
-        $val = trim($tabs[$i]);
-        $valNorm = str_replace(',', '.', $val);
-
-        if (strtoupper($val) === 'QB') {
-            if ($qty === '') $qty = 'QB';
-            else $unit = 'QB';
-        } elseif (preg_match('/^(\d+(?:\.\d+)?)\s*%$/', $valNorm, $m)) {
-            $pct = $m[1] . '%';
-        } elseif (preg_match('/^(\d+(?:\.\d+)?)$/', $valNorm)) {
-            $qty = $valNorm;
-        } elseif (preg_match('/^(\d+(?:\.\d+)?)\s*(g|kg|ml|l|un|xic|colher|copo)$/i', $valNorm, $m)) {
-            $qty = $m[1];
-            $unit = $m[2];
-        } elseif (preg_match('/^[a-zA-Z]+$/', $val) && strlen($val) <= 4) {
-            $unit = $val;
-        } elseif ($qty === '' && preg_match('/^(\d+(?:\.\d+)?)\s*%/', $valNorm, $m)) {
-            $pct = $m[1] . '%';
+            if (strtoupper($val) === 'QB') {
+                if ($qty === '') $qty = 'QB';
+                else $unit = 'QB';
+            } elseif (preg_match('/^(\d+(?:\.\d+)?)\s*%$/', $valNorm, $m)) {
+                $pct = $m[1] . '%';
+            } elseif (preg_match('/^(\d+(?:\.\d+)?)$/', $valNorm)) {
+                $qty = $valNorm;
+            } elseif (preg_match('/^(\d+(?:\.\d+)?)\s*(g|kg|ml|l|un|xic|colher|copo)$/i', $valNorm, $m)) {
+                $qty = $m[1];
+                $unit = $m[2];
+            } elseif (preg_match('/^[a-zA-Z]+$/', $val) && strlen($val) <= 4) {
+                $unit = $val;
+            } elseif ($qty === '' && preg_match('/^(\d+(?:\.\d+)?)\s*%/', $valNorm, $m)) {
+                $pct = $m[1] . '%';
+            }
         }
+
+        $parts = [];
+        if ($pct !== '') $parts[] = $pct;
+        if ($qty !== '' && $qty !== 'QB') $parts[] = $qty . ($unit ?: 'g');
+        elseif ($qty === 'QB') $parts[] = 'QB';
+
+        $value = !empty($parts) ? implode(' - ', $parts) : $name;
+
+        return [
+            'key' => slugify($name),
+            'name' => $name,
+            'value' => $value,
+        ];
     }
 
-    $parts = [];
-    if ($pct !== '') $parts[] = $pct;
-    if ($qty !== '' && $qty !== 'QB') $parts[] = $qty . ($unit ?: 'g');
-    elseif ($qty === 'QB') $parts[] = 'QB';
+    return parseIngredientLineFromText($line);
+}
 
-    $value = !empty($parts) ? implode(' - ', $parts) : $name;
+function parseIngredientLineFromText($line) {
+    $line = trim($line);
+    if ($line === '') return null;
 
-    return [
-        'key' => slugify($name),
-        'name' => $name,
-        'value' => $value,
-    ];
+    if (strtoupper($line) === 'QB') {
+        return ['key' => 'qb', 'name' => 'QB', 'value' => 'QB'];
+    }
+
+    if (!preg_match('/\d+/', $line)) return null;
+
+    if (preg_match('/^(.+?)\s*=?\s*(\d+(?:[.,]\d+)?)\s*%\s*(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l)?\s*$/i', $line, $m)) {
+        $name = trim($m[1]);
+        $pct = str_replace(',', '.', $m[2]);
+        $qty = str_replace(',', '.', $m[3]);
+        $unit = $m[4] ?: 'g';
+        return [
+            'key' => slugify($name),
+            'name' => $name,
+            'value' => "$pct% - $qty$unit",
+        ];
+    }
+
+    if (preg_match('/^(.+?)\s*=?\s*(\d+(?:[.,]\d+)?)\s*%\s*$/i', $line, $m)) {
+        $name = trim($m[1]);
+        $pct = str_replace(',', '.', $m[2]);
+        return [
+            'key' => slugify($name),
+            'name' => $name,
+            'value' => "$pct%",
+        ];
+    }
+
+    if (preg_match('/^(.+?)\s*=\s*(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l)?\s*$/i', $line, $m)) {
+        $name = trim($m[1]);
+        $qty = str_replace(',', '.', $m[2]);
+        $unit = $m[3] ?: 'g';
+        return [
+            'key' => slugify($name),
+            'name' => $name,
+            'value' => "$qty$unit",
+        ];
+    }
+
+    return null;
 }
 
 function isIngredientLine($line, $raw) {
@@ -206,8 +263,10 @@ function parseSections($text) {
     $subGrupo = '';
 
     foreach ($ingredientesLines as $item) {
-        $line = $item['trimmed'];
+        $line = cleanWikiMarkup($item['trimmed']);
         $raw = $item['raw'];
+
+        if ($line === '') continue;
 
         if (preg_match('/\t/', $raw)) {
             $parsed = parseIngredientLine($line);
@@ -219,7 +278,7 @@ function parseSections($text) {
         }
 
         if (preg_match('/^(\d+(?:[.,]\d+)?)\s*%/', $line)) {
-            $parsed = parseIngredientLine($line);
+            $parsed = parseIngredientLineFromText($line);
             if ($parsed) {
                 $key = $subGrupo ? $subGrupo . '/' . $parsed['key'] : $parsed['key'];
                 $ingredientes[$key] = $parsed['value'];
@@ -228,7 +287,7 @@ function parseSections($text) {
         }
 
         if (preg_match('/^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l)\b/i', $line)) {
-            $parsed = parseIngredientLine($line);
+            $parsed = parseIngredientLineFromText($line);
             if ($parsed) {
                 $key = $subGrupo ? $subGrupo . '/' . $parsed['key'] : $parsed['key'];
                 $ingredientes[$key] = $parsed['value'];
@@ -247,6 +306,20 @@ function parseSections($text) {
         }
 
         if (preg_match('/^obs/i', $line)) continue;
+
+        if (preg_match('/^total\b/i', $line)) continue;
+
+        if (preg_match('/^(.+?)\s*=?\s*(\d+(?:[.,]\d+)?)\s*%/', $line, $m)) {
+            $name = trim($m[1]);
+            if (!preg_match('/^(ingredientes?|fim)/i', $name)) {
+                $parsed = parseIngredientLineFromText($line);
+                if ($parsed) {
+                    $key = $subGrupo ? $subGrupo . '/' . $parsed['key'] : $parsed['key'];
+                    $ingredientes[$key] = $parsed['value'];
+                    continue;
+                }
+            }
+        }
 
         $subGrupo = slugify($line);
     }
@@ -281,7 +354,9 @@ function parseRecipeFromText($text, $filename) {
     $lines = array_map('trim', $lines);
 
     $titulo = !empty($lines) ? $lines[0] : pathinfo($filename, PATHINFO_FILENAME);
+    $titulo = cleanWikiMarkup($titulo);
     $titulo = preg_replace('/[_-]/', ' ', $titulo);
+    $titulo = trim($titulo);
 
     $id = slugify($titulo);
     $cat = detectCategoria($text);

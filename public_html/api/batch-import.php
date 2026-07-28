@@ -27,7 +27,8 @@ $docsDir = $argv[1] ?? $jsonBody['docsDir'] ?? '/home/isaacca/hd/Codigos/site_pe
 $tmpDir = sys_get_temp_dir() . '/batch_import_' . uniqid();
 
 $log = [];
-function apiLog($msg) use (&$log, $isCli) {
+function apiLog($msg) {
+    global $log, $isCli;
     $log[] = $msg;
     if ($isCli) echo $msg . "\n";
 }
