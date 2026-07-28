@@ -9,7 +9,7 @@ header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Content-Type: application/json');
 
-$allowedOrigins = ['http://localhost:3000', 'https://pao.50webs.org'];
+$allowedOrigins = ['http://localhost:3000', 'https://receitas.free.nf', 'https://pao.50webs.org'];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowedOrigins)) {
     header("Access-Control-Allow-Origin: $origin");
@@ -49,9 +49,9 @@ define('DB_HOST', $isLocal ? env('DB_LOCAL_HOST', '127.0.0.1') : env('DB_HOST', 
 define('DB_PORT', $isLocal ? env('DB_LOCAL_PORT', '3306') : '3306');
 define('DB_NAME', $isLocal ? env('DB_LOCAL_DATABASE') : env('DB_NAME', 'if0_42505744_receitas'));
 define('DB_USERNAME', $isLocal ? env('DB_LOCAL_USERNAME') : env('DB_USERNAME', 'if0_42505744'));
-define('DB_PASSWORD', $isLocal ? env('DB_LOCAL_PASSWORD', '') : env('DB_PASSWORD', ''));
+define('DB_PASSWORD', $isLocal ? env('DB_LOCAL_PASSWORD', '') : env('DB_PASSWORD', 'Apj1Tx0lbQOfL'));
 define('IS_LOCAL', $isLocal);
-define('ADMIN_KEY', env('ADMIN_KEY', ''));
+define('ADMIN_KEY', env('ADMIN_KEY', 'receitas-cei-2009'));
 
 define('MAX_FILE_SIZE', 5 * 1024 * 1024);
 define('ALLOWED_EXTENSIONS', ['doc', 'docx', 'txt', 'md']);

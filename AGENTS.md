@@ -10,6 +10,7 @@ Substitui o projeto antigo em `pao.50webs.org`.
 - **Backend:** PHP 8+ (API REST, sessions, CSRF)
 - **Banco:** MySQL (InfinityFree: `sql202.infinityfree.com`, `if0_42505744_receitas`)
 - **Deploy:** FTP via GitHub Actions para InfinityFree (`ftpupload.net`)
+- **URL:** `https://receitas.free.nf`
 - **Template visual:** Chef's Kitchen (ThemeWagon)
 
 ## Estrutura do Projeto
@@ -32,15 +33,22 @@ receitas-cei/
 │   │   ├── csrf.php            # GET /api/csrf
 │   │   ├── auth.php            # POST login, GET session, DELETE logout
 │   │   ├── receitas.php        # CRUD receitas
-│   │   └── import.php          # Upload .doc/.docx + parse server-side
+│   │   ├── import.php          # Upload .doc/.docx + parse server-side
+│   ├── images.php          # Busca imagens (Unsplash/MealDB/Picsum)
+│   ├── batch-import.php    # Importacao em lote via API
+│   └── db.php              # Gerenciamento do banco (backup/restore/reset)
 │   ├── favicon.svg
+│   ├── favicon.png
+│   ├── favicon-circle.png
 │   ├── icons.svg
 │   └── assets/                 # Build output (gitignored)
 ├── vite.config.js              # root: public_html, proxy /api -> :8080
 ├── package.json                # Scripts: dev, build
 ├── scripts/
-│   ├── add-receita.sh          # CLI bash para importar receitas
-│   └── deploy.sh               # Deploy FTP manual
+│   ├── import.mjs          # Import .doc via Node.js (docToText + mysql2)
+│   ├── add-receita.sh      # CLI bash para importar receitas
+│   └── deploy.sh           # Deploy FTP manual
+├── sqls/                    # Backups SQL
 ├── .env                        # Credenciais (gitignored)
 └── .env.example                # Template de env
 ```
@@ -56,7 +64,7 @@ receitas-cei/
 - **Auth:** Session-based PHP (`$_SESSION['authenticated']`, `$_SESSION['admin_key']`)
 - **CSRF:** Tokens server-side via `generateCsrfToken()`, header `X-CSRF-Token`
 - **Headers:** X-Frame-Options DENY, nosniff, XSS-Protection, Referrer-Policy
-- **CORS:** Restrito a `localhost:3000` e `pao.50webs.org`
+- **CORS:** Restrito a `localhost:3000`, `receitas.free.nf` e `pao.50webs.org`
 - **Upload:** Validacao MIME (finfo), tamanho max 5MB, magic bytes (.doc: D0CF, .docx: PK)
 
 ## API Endpoints
@@ -81,10 +89,13 @@ receitas-cei/
 - HTML source e build target no mesmo local (`public_html/`)
 
 ## Deploy
-- Push no `main` dispara GitHub Actions
+- Push de tag `v*` ou `workflow_dispatch` dispara GitHub Actions
 - Build: `npm run build`
-- Deploy: mirror `public_html/` via FTP para `ftpupload.net`
+- Deploy: mirror `public_html/` via FTP para `ftpupload.net` (lftp com `set ftp:chmod ''` e `--no-perms` — InfinityFree nao aceita CHMOD)
 - Credenciais no `.env` (FTP_HOST, FTP_USERNAME, FTP_PASSWORD)
+- **GitHub Secrets:** `FTP_HOST`, `FTP_USER`, `FTP_PASS` (configurados via `gh secret set`)
+- `public_html/assets/` e gitignored (build output do Vite)
+- HTML source e build target no mesmo local (`public_html/`)
 
 ## Projeto Antigo
 - `/home/isaacca/hd/Codigos/site_pessoal/pao.50webs.org`
