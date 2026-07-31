@@ -11,7 +11,7 @@ Substitui o projeto antigo em `pao.50webs.org`.
 - **Banco:** MySQL (InfinityFree: `sql202.infinityfree.com`, `if0_42505744_receitas`)
 - **Deploy:** FTP via GitHub Actions para InfinityFree (`ftpupload.net`)
 - **URL:** `https://receitas.free.nf`
-- **Versão:** v1.1.2
+- **Versão:** v1.2.0
 - **Template visual:** Chef's Kitchen (ThemeWagon)
 
 ## Estrutura do Projeto
@@ -38,6 +38,11 @@ receitas-cei/
 │   ├── images.php          # Busca imagens (Unsplash/MealDB/Picsum)
 │   ├── batch-import.php    # Importacao em lote via API
 │   └── db.php              # Gerenciamento do banco (backup/restore/reset)
+│   ├── index.php           # Front controller SPA: meta por rota (SEO)
+│   ├── receita.php         # Prerender de receita (meta + JSON-LD Recipe + noscript)
+│   ├── sitemap.php         # Sitemap dinamico (/sitemap.xml)
+│   ├── robots.txt          # Bloqueia /admin e /api; aponta sitemap
+│   ├── .htaccess           # Rewrites: receita.php, index.php, sitemap, fallback SPA
 │   ├── favicon.svg
 │   ├── favicon.png
 │   ├── favicon-circle.png

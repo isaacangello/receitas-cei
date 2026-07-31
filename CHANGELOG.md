@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-31
+
+### SEO: URLs limpas + prerender no PHP
+- Roteamento migrado de hash (`#/receita/x`) para History API: URLs indexáveis `/receita/pao-frances`, `/receitas`, `/sobre`, `/contato`
+- Redirecionamento automático de links antigos `#/...` para os novos caminhos (compatibilidade)
+- Clique em links internos usa `pushState` (sem reload); navegação por `popstate` funciona com voltar/avançar
+- `public_html/index.php`: front controller que injeta title, description, canonical, Open Graph e `og:locale` por rota na shell da SPA
+- `public_html/receita.php`: prerender de receita com meta própria, **JSON-LD Recipe** (ingredientes, modo de preparo passo a passo, categoria, data, imagem) e conteúdo em `<noscript>` para crawlers sem JS; 404 para id inexistente
+- `public_html/sitemap.php`: sitemap dinâmico (`/sitemap.xml` via rewrite) com todas as URLs, incluindo 1 URL por receita
+- `public_html/robots.txt`: bloqueia `/admin/` e `/api/`, aponta para o sitemap
+- `.htaccess`: rewrites do front controller (arquivos reais servidos direto; `/receita/:id`, rotas da SPA e fallback via `index.php`)
+- `api/config.php`: headers de JSON/CORS condicionais via `CONFIG_HTML_MODE` (páginas HTML não herdam content-type de API)
+- Meta dinâmica client-side: `document.title`, description, canonical e Open Graph atualizados a cada navegação no SPA
+
 ## [1.1.2] - 2026-07-31
 
 ### Bug Fixes

@@ -1,3 +1,28 @@
 <Files ".env">
   Require all denied
 </Files>
+
+DirectoryIndex index.php index.html
+
+Options -MultiViews
+RewriteEngine On
+
+# Arquivos e diretorios reais sao servidos diretamente
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Sitemap dinamico
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+# Prerender de receita
+RewriteRule ^receita/([^/]+)/?$ receita.php?id=$1 [L,QSA]
+
+# Rotas da SPA com meta por pagina
+RewriteRule ^(receitas|sobre|contato)/?$ index.php?route=$1 [L,QSA]
+
+# Home e fallback para a shell da SPA
+RewriteRule ^$ index.php?route=home [L,QSA]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.php?route=home [L,QSA]

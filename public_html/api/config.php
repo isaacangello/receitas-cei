@@ -7,16 +7,19 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
-header('Content-Type: application/json');
 
-$allowedOrigins = ['http://localhost:3000', 'https://receitas.free.nf', 'https://pao.50webs.org'];
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowedOrigins)) {
-    header("Access-Control-Allow-Origin: $origin");
-    header('Access-Control-Allow-Credentials: true');
+if (!defined('CONFIG_HTML_MODE')) {
+    header('Content-Type: application/json');
+
+    $allowedOrigins = ['http://localhost:3000', 'https://receitas.free.nf', 'https://pao.50webs.org'];
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    if (in_array($origin, $allowedOrigins)) {
+        header("Access-Control-Allow-Origin: $origin");
+        header('Access-Control-Allow-Credentials: true');
+    }
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, X-Admin-Key, X-CSRF-Token');
 }
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-Admin-Key, X-CSRF-Token');
 
 function loadEnv($path) {
     if (!file_exists($path)) return false;

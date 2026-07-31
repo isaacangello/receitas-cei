@@ -18,27 +18,27 @@
   <nav class="bg-gradient-to-r from-primary-light via-primary to-primary-dark text-white shadow-lg sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex items-center justify-between h-16">
-        <a href="#/home" class="flex items-center gap-2">
+        <a href="/" class="flex items-center gap-2">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
           </svg>
           <span class="font-display text-xl font-bold">Receitas CEI</span>
         </a>
         <div class="hidden md:flex items-center gap-6">
-          <a href="#/home" class="hover:text-cream transition-colors">Início</a>
-          <a href="#/receitas" class="hover:text-cream transition-colors">Receitas</a>
-          <a href="#/sobre" class="hover:text-cream transition-colors">Sobre</a>
-          <a href="#/contato" class="hover:text-cream transition-colors">Contato</a>
+          <a href="/" class="hover:text-cream transition-colors">Início</a>
+          <a href="/receitas" class="hover:text-cream transition-colors">Receitas</a>
+          <a href="/sobre" class="hover:text-cream transition-colors">Sobre</a>
+          <a href="/contato" class="hover:text-cream transition-colors">Contato</a>
         </div>
         <button class="md:hidden" x-data="{ open: false }" @click="open = !open">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
           <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50">
-            <a href="#/home" class="block px-4 py-2 text-gray-800 hover:bg-cream">Início</a>
-            <a href="#/receitas" class="block px-4 py-2 text-gray-800 hover:bg-cream">Receitas</a>
-            <a href="#/sobre" class="block px-4 py-2 text-gray-800 hover:bg-cream">Sobre</a>
-            <a href="#/contato" class="block px-4 py-2 text-gray-800 hover:bg-cream">Contato</a>
+            <a href="/" class="block px-4 py-2 text-gray-800 hover:bg-cream">Início</a>
+            <a href="/receitas" class="block px-4 py-2 text-gray-800 hover:bg-cream">Receitas</a>
+            <a href="/sobre" class="block px-4 py-2 text-gray-800 hover:bg-cream">Sobre</a>
+            <a href="/contato" class="block px-4 py-2 text-gray-800 hover:bg-cream">Contato</a>
           </div>
         </button>
       </div>
@@ -54,7 +54,7 @@
         <div class="relative max-w-6xl mx-auto px-4 text-center">
           <h1 class="font-display text-4xl md:text-6xl font-bold mb-4">Receitas do Curso de Panificação</h1>
           <p class="text-xl text-cream mb-8 max-w-2xl mx-auto">Aprenda as receitas passadas em sala de aula no CEI de Quintino. Pães, bolos, broas e muito mais.</p>
-          <a href="#/receitas" class="inline-block bg-gradient-to-r from-accent-light via-accent to-accent-dark hover:bg-gradient-to-br text-white font-bold py-3 px-8 rounded-lg transition-colors">
+          <a href="/receitas" class="inline-block bg-gradient-to-r from-accent-light via-accent to-accent-dark hover:bg-gradient-to-br text-white font-bold py-3 px-8 rounded-lg transition-colors">
             Ver Receitas
           </a>
         </div>
@@ -65,7 +65,7 @@
         <h2 class="font-display text-3xl font-bold text-primary mb-8 text-center">Receitas em Destaque</h2>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <template x-for="receita in $store.receitas.getAll().slice(0, 6)" :key="receita.id">
-            <a :href="'#/receita/' + receita.id" class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow group">
+            <a :href="'/receita/' + receita.id" class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow group">
               <div class="h-48 relative overflow-hidden">
                 <template x-if="receita.image_url">
                   <img :src="receita.image_url" :alt="receita.titulo" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
@@ -85,7 +85,7 @@
           </template>
         </div>
         <div class="text-center mt-12">
-          <a href="#/receitas" class="inline-block border-2 border-primary text-primary hover:bg-gradient-to-r hover:from-primary-light hover:via-primary hover:to-primary-dark hover:text-white font-bold py-3 px-8 rounded-lg transition-colors">
+          <a href="/receitas" class="inline-block border-2 border-primary text-primary hover:bg-gradient-to-r hover:from-primary-light hover:via-primary hover:to-primary-dark hover:text-white font-bold py-3 px-8 rounded-lg transition-colors">
             Ver Todas as Receitas
           </a>
         </div>
@@ -97,7 +97,7 @@
           <h2 class="font-display text-3xl font-bold text-primary mb-8 text-center">Categorias</h2>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <template x-for="cat in $store.receitas.getCategorias()" :key="cat">
-              <a :href="'#/receitas?cat=' + encodeURIComponent(cat)" class="bg-cream rounded-xl p-6 text-center hover:bg-gradient-to-r hover:from-accent-light hover:via-accent hover:to-accent-dark hover:text-white transition-colors group">
+              <a :href="'/receitas?cat=' + encodeURIComponent(cat)" class="bg-cream rounded-xl p-6 text-center hover:bg-gradient-to-r hover:from-accent-light hover:via-accent hover:to-accent-dark hover:text-white transition-colors group">
                 <div class="text-3xl mb-2">
                   <span x-text="cat === 'Paes' ? '🍞' : cat === 'Bolos' ? '🎂' : cat === 'Broas' ? '🌽' : '🍝'"></span>
                 </div>
@@ -125,13 +125,13 @@
 
       <!-- Filtro por categoria -->
       <div class="flex flex-wrap gap-3 mb-8">
-        <button @click="window.location.hash = '#/receitas'"
+        <button @click="$store.router.navigate('/receitas')"
           class="px-4 py-2 rounded-full text-sm font-semibold transition-colors"
           :class="!$store.router.params.cat ? 'bg-gradient-to-r from-primary-light via-primary to-primary-dark text-white' : 'bg-white text-gray-700 hover:bg-gray-100'">
           Todas
         </button>
         <template x-for="cat in $store.receitas.getCategorias()" :key="cat">
-          <button @click="window.location.hash = '#/receitas?cat=' + encodeURIComponent(cat)"
+          <button @click="$store.router.navigate('/receitas?cat=' + encodeURIComponent(cat))"
             class="px-4 py-2 rounded-full text-sm font-semibold transition-colors"
             :class="$store.router.params.cat === cat ? 'bg-gradient-to-r from-primary-light via-primary to-primary-dark text-white' : 'bg-white text-gray-700 hover:bg-gray-100'"
             x-text="cat">
@@ -142,7 +142,7 @@
       <!-- Lista -->
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         <template x-for="receita in $store.receitas.getAll()" :key="receita.id">
-          <a :href="'#/receita/' + receita.id" class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow group">
+          <a :href="'/receita/' + receita.id" class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow group">
             <div class="h-40 relative overflow-hidden">
               <template x-if="receita.image_url">
                 <img :src="receita.image_url" :alt="receita.titulo" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
@@ -169,7 +169,7 @@
     <div class="max-w-4xl mx-auto px-4 py-12" x-data="{ receita: $store.receitas.getById($store.router.params.id) }">
       <template x-if="receita">
         <div>
-          <a href="#/receitas" class="inline-flex items-center text-accent hover:text-primary mb-6 transition-colors">
+          <a href="/receitas" class="inline-flex items-center text-accent hover:text-primary mb-6 transition-colors">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -249,7 +249,7 @@
       <template x-if="!receita">
         <div class="text-center py-20">
           <h2 class="font-display text-2xl text-gray-500">Receita não encontrada</h2>
-          <a href="#/receitas" class="text-accent hover:text-primary mt-4 inline-block">Voltar para receitas</a>
+          <a href="/receitas" class="text-accent hover:text-primary mt-4 inline-block">Voltar para receitas</a>
         </div>
       </template>
     </div>

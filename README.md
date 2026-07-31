@@ -2,7 +2,7 @@
 
 Site de receitas do curso de panificacao do CEI de Quintino.
 
-- **Versao:** v1.1.2
+- **Versao:** v1.2.0
 - **URL:** https://receitas.free.nf
 
 [Como formatar receitas para importacao](RECEITAS.md)
@@ -12,6 +12,14 @@ Site de receitas do curso de panificacao do CEI de Quintino.
 ## Sobre
 
 Site para gerenciar e consultar receitas do curso de panificacao. As receitas sao armazenadas em banco de dados MySQL e podem ser importadas a partir de arquivos `.doc`, `.docx`, `.txt` e `.md`.
+
+## SEO
+
+- URLs indexaveis (History API): `/`, `/receitas`, `/receita/:id`, `/sobre`, `/contato`
+- Prerender no PHP: `index.php` (meta por rota) e `receita.php` (meta + JSON-LD Recipe + conteudo em `<noscript>`, 404 para id inexistente)
+- `sitemap.xml` dinamico (via `sitemap.php`) e `robots.txt` bloqueando `/admin/` e `/api/`
+- Meta dinamica no SPA (title, description, canonical, Open Graph) a cada navegacao
+- Para usar no dev: `npm run dev` (Vite na 3000). No servidor, o `.htaccess` reescreve as rotas para os arquivos PHP
 
 ## Funcionamento
 
