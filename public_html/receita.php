@@ -118,7 +118,7 @@ $jsonLd = [
     'recipeCuisine' => 'Brasileira',
     'keywords' => implode(', ', array_filter(['panificação', $receita['categoria'], $receita['titulo']])),
     'author' => ['@type' => 'Organization', 'name' => 'Curso de Panificação CEI de Quintino', 'url' => $siteUrl],
-    'publisher' => ['@type' => 'Person', 'name' => 'Isaac Angelo', 'url' => 'https://isaacangelo.dev'],
+    'publisher' => ['@type' => 'Person', 'name' => 'Isaac Angelo', 'url' => 'https://isaacangello.free.nf/'],
     'inLanguage' => 'pt-BR',
     'isAccessibleForFree' => true,
     'mainEntityOfPage' => $canonical,
