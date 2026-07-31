@@ -6,7 +6,7 @@
 
 ### SEO: JSON-LD Recipe enriquecido
 - Campos recomendados adicionados ao schema Recipe: `recipeCuisine` ("Brasileira"), `keywords`, `mainEntityOfPage`, `isAccessibleForFree`
-- `author` e `publisher` agora incluem `url`; autor mantido como Organization "Curso de Panificação CEI de Quintino"
+- `author` (Organization "Curso de Panificação CEI de Quintino") e `publisher` (Person "Isaac Angelo", url do portfólio) agora incluem `url`
 - Publisher sem logo por enquanto (favicon 40x40 abaixo dos 112px exigidos pelo Google; logo adequada será criada na Fase 3)
 
 ## [1.2.0] - 2026-07-31
