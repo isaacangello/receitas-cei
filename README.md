@@ -2,6 +2,9 @@
 
 Site de receitas do curso de panificacao do CEI de Quintino.
 
+- **Versao:** v1.1.2
+- **URL:** https://receitas.free.nf
+
 [Como formatar receitas para importacao](RECEITAS.md)
 
 ---
@@ -48,6 +51,18 @@ node scripts/import.mjs
 
 # Importar arquivo especifico
 node scripts/import.mjs --file "09_11_2009_pao_doce.doc"
+```
+
+### Correcoes ortograficas em lote
+
+O script `scripts/fix-ortografia.mjs` corrige acentuacao nos textos e chaves de ingredientes das receitas:
+
+```bash
+# Ver o que seria corrigido (a partir do dump de backup)
+node scripts/fix-ortografia.mjs --from sqls/receitas-backup-2026-07-31.sql --dry-run
+
+# Gerar o patch SQL para aplicar via Admin -> DB -> Restaurar
+node scripts/fix-ortografia.mjs --from sqls/receitas-backup-2026-07-31.sql --sql sqls/correcoes-ortografia.sql
 ```
 
 ### API
@@ -114,8 +129,10 @@ receitas-cei/
 │       ├── batch-import.php  # Importacao em lote via API
 │       └── db.php            # Gerenciamento do banco (backup/restore/reset)
 ├── scripts/
-│   └── import.mjs            # Import .doc via Node.js (docToText + mysql2)
-├── sqls/                     # Backups SQL
+│   ├── import.mjs            # Import .doc via Node.js (docToText + mysql2)
+│   ├── fix-ortografia.mjs    # Correcoes ortograficas em lote (gera patch SQL)
+│   └── deploy.sh             # Deploy FTP manual (build + lftp mirror)
+├── sqls/                     # Backups SQL + patchs de correcao
 ├── .env                      # Credenciais (nao versionado)
 ├── .env.example              # Template do .env
 ├── .gitignore

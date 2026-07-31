@@ -13,18 +13,28 @@ Alpine.store('router', {
 
   navigateFromHash() {
     const hash = window.location.hash.slice(1) || '/home'
-    const parts = hash.split('/').filter(Boolean)
+    const [pathPart, queryPart] = hash.split('?')
+    const parts = pathPart.split('/').filter(Boolean)
+
+    const params = {}
+    if (queryPart) {
+      for (const pair of queryPart.split('&')) {
+        const idx = pair.indexOf('=')
+        if (idx === -1) continue
+        const k = pair.slice(0, idx)
+        params[k] = decodeURIComponent(pair.slice(idx + 1))
+      }
+    }
 
     if (parts[0] === 'receita' && parts[1]) {
       this.current = 'receita'
-      this.params = { id: parts[1] }
+      params.id = parts[1]
     } else if (parts[0] === 'admin') {
       this.current = 'admin'
-      this.params = {}
     } else {
       this.current = parts[0] || 'home'
-      this.params = {}
     }
+    this.params = params
   },
 
   navigate(page) {
@@ -50,7 +60,10 @@ Alpine.store('receitas', {
   },
 
   getAll() {
-    return this.filtered ?? this.items
+    const cat = Alpine.store('router').params.cat
+    let list = this.filtered ?? this.items
+    if (cat) list = list.filter(r => r.categoria === cat)
+    return list
   },
 
   getByCategoria(cat) {

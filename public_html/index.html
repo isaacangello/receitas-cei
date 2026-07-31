@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Receitas CEI - Curso de Panificacao</title>
-  <meta name="description" content="Receitas do curso de panificacao CEI de Quintino. Aprenda a fazer paes, bolos e doces artesanais.">
+  <title>Receitas CEI - Curso de Panificação</title>
+  <meta name="description" content="Receitas do curso de panificação CEI de Quintino. Aprenda a fazer pães, bolos e doces artesanais.">
   <link rel="icon" type="image/png" href="/favicon-circle.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@
 <body class="bg-warm-gray min-h-screen" x-data x-init="$store.router.init()">
 
   <!-- NAVBAR -->
-  <nav class="bg-primary text-white shadow-lg sticky top-0 z-50">
+  <nav class="bg-gradient-to-r from-primary-light via-primary to-primary-dark text-white shadow-lg sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <a href="#/home" class="flex items-center gap-2">
@@ -25,7 +25,7 @@
           <span class="font-display text-xl font-bold">Receitas CEI</span>
         </a>
         <div class="hidden md:flex items-center gap-6">
-          <a href="#/home" class="hover:text-cream transition-colors">Inicio</a>
+          <a href="#/home" class="hover:text-cream transition-colors">Início</a>
           <a href="#/receitas" class="hover:text-cream transition-colors">Receitas</a>
           <a href="#/sobre" class="hover:text-cream transition-colors">Sobre</a>
           <a href="#/contato" class="hover:text-cream transition-colors">Contato</a>
@@ -35,7 +35,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
           <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50">
-            <a href="#/home" class="block px-4 py-2 text-gray-800 hover:bg-cream">Inicio</a>
+            <a href="#/home" class="block px-4 py-2 text-gray-800 hover:bg-cream">Início</a>
             <a href="#/receitas" class="block px-4 py-2 text-gray-800 hover:bg-cream">Receitas</a>
             <a href="#/sobre" class="block px-4 py-2 text-gray-800 hover:bg-cream">Sobre</a>
             <a href="#/contato" class="block px-4 py-2 text-gray-800 hover:bg-cream">Contato</a>
@@ -52,9 +52,9 @@
       <section class="relative bg-primary text-white py-20 overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-r from-primary-dark to-primary opacity-90"></div>
         <div class="relative max-w-6xl mx-auto px-4 text-center">
-          <h1 class="font-display text-4xl md:text-6xl font-bold mb-4">Receitas do Curso de Panificacao</h1>
-          <p class="text-xl text-cream mb-8 max-w-2xl mx-auto">Aprenda as receitas passadas em sala de aula no CEI de Quintino. Paes, bolos, broas e muito mais.</p>
-          <a href="#/receitas" class="inline-block bg-accent hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg transition-colors">
+          <h1 class="font-display text-4xl md:text-6xl font-bold mb-4">Receitas do Curso de Panificação</h1>
+          <p class="text-xl text-cream mb-8 max-w-2xl mx-auto">Aprenda as receitas passadas em sala de aula no CEI de Quintino. Pães, bolos, broas e muito mais.</p>
+          <a href="#/receitas" class="inline-block bg-gradient-to-r from-accent-light via-accent to-accent-dark hover:bg-gradient-to-br text-white font-bold py-3 px-8 rounded-lg transition-colors">
             Ver Receitas
           </a>
         </div>
@@ -85,7 +85,7 @@
           </template>
         </div>
         <div class="text-center mt-12">
-          <a href="#/receitas" class="inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold py-3 px-8 rounded-lg transition-colors">
+          <a href="#/receitas" class="inline-block border-2 border-primary text-primary hover:bg-gradient-to-r hover:from-primary-light hover:via-primary hover:to-primary-dark hover:text-white font-bold py-3 px-8 rounded-lg transition-colors">
             Ver Todas as Receitas
           </a>
         </div>
@@ -97,7 +97,7 @@
           <h2 class="font-display text-3xl font-bold text-primary mb-8 text-center">Categorias</h2>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <template x-for="cat in $store.receitas.getCategorias()" :key="cat">
-              <a :href="'#/receitas?cat=' + cat" class="bg-cream rounded-xl p-6 text-center hover:bg-accent hover:text-white transition-colors group">
+              <a :href="'#/receitas?cat=' + encodeURIComponent(cat)" class="bg-cream rounded-xl p-6 text-center hover:bg-gradient-to-r hover:from-accent-light hover:via-accent hover:to-accent-dark hover:text-white transition-colors group">
                 <div class="text-3xl mb-2">
                   <span x-text="cat === 'Paes' ? '🍞' : cat === 'Bolos' ? '🎂' : cat === 'Broas' ? '🌽' : '🍝'"></span>
                 </div>
@@ -127,13 +127,13 @@
       <div class="flex flex-wrap gap-3 mb-8">
         <button @click="window.location.hash = '#/receitas'"
           class="px-4 py-2 rounded-full text-sm font-semibold transition-colors"
-          :class="!window.location.hash.includes('cat=') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'">
+          :class="!$store.router.params.cat ? 'bg-gradient-to-r from-primary-light via-primary to-primary-dark text-white' : 'bg-white text-gray-700 hover:bg-gray-100'">
           Todas
         </button>
         <template x-for="cat in $store.receitas.getCategorias()" :key="cat">
-          <button @click="window.location.hash = '#/receitas?cat=' + cat"
+          <button @click="window.location.hash = '#/receitas?cat=' + encodeURIComponent(cat)"
             class="px-4 py-2 rounded-full text-sm font-semibold transition-colors"
-            :class="window.location.hash.includes('cat=' + cat) ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'"
+            :class="$store.router.params.cat === cat ? 'bg-gradient-to-r from-primary-light via-primary to-primary-dark text-white' : 'bg-white text-gray-700 hover:bg-gray-100'"
             x-text="cat">
           </button>
         </template>
@@ -238,7 +238,7 @@
               <!-- Observacoes -->
               <template x-if="receita.observacoes">
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
-                  <h3 class="font-bold text-yellow-800 mb-1">Observacoes</h3>
+                  <h3 class="font-bold text-yellow-800 mb-1">Observações</h3>
                   <p class="text-yellow-700" x-text="receita.observacoes"></p>
                 </div>
               </template>
@@ -248,7 +248,7 @@
       </template>
       <template x-if="!receita">
         <div class="text-center py-20">
-          <h2 class="font-display text-2xl text-gray-500">Receita nao encontrada</h2>
+          <h2 class="font-display text-2xl text-gray-500">Receita não encontrada</h2>
           <a href="#/receitas" class="text-accent hover:text-primary mt-4 inline-block">Voltar para receitas</a>
         </div>
       </template>
@@ -261,17 +261,20 @@
       <h1 class="font-display text-4xl font-bold text-primary mb-8">Sobre o Curso</h1>
       <div class="bg-white rounded-2xl shadow-lg p-8">
         <p class="text-gray-700 leading-relaxed mb-6">
-          Este site foi criado com o objetivo de ajudar os colegas de curso, disponibilizando as receitas passadas em sala de aula no curso de panificacao do CEI de Quintino.
+          Este site foi criado com o objetivo de ajudar os colegas de curso, disponibilizando as receitas passadas em sala de aula no curso de panificação do CEI de Quintino.
         </p>
         <p class="text-gray-700 leading-relaxed mb-6">
-          O curso acontece na Escola de Hotelaria, de segunda a quinta das 13h as 16h.
+          Todas as receitas do ano de 2009 são do livro de padeiro.
         </p>
         <p class="text-gray-700 leading-relaxed mb-6">
-          As receitas sao apresentadas em porcentagem para facilitar os calculos. Caso tenha duvidas sobre como calcular porcentagem, assista ao video explicativo.
+          O curso acontece na Escola de Hotelaria, de segunda a quinta das 13h às 16h.
+        </p>
+        <p class="text-gray-700 leading-relaxed mb-6">
+          As receitas são apresentadas em porcentagem para facilitar os cálculos. Caso tenha dúvidas sobre como calcular porcentagem, assista ao vídeo explicativo.
         </p>
         <div class="bg-cream rounded-xl p-6 mt-8">
-          <h2 class="font-display text-xl font-bold text-primary mb-2">Os Calculos</h2>
-          <p class="text-gray-600">Para efetuar os calculos aplicados nas receitas voce deve usar a porcentagem.</p>
+          <h2 class="font-display text-xl font-bold text-primary mb-2">Os Cálculos</h2>
+          <p class="text-gray-600">Para efetuar os cálculos aplicados nas receitas você deve usar a porcentagem.</p>
         </div>
       </div>
     </div>
@@ -283,7 +286,7 @@
       <h1 class="font-display text-4xl font-bold text-primary mb-8">Contato</h1>
       <div class="bg-white rounded-2xl shadow-lg p-8">
         <p class="text-gray-700 leading-relaxed mb-6">
-          Este site foi feito por Isaac Angelo. Se quiser ver outros sites de sua autoria, acesse o portfolio.
+          Este site foi feito por Isaac Angelo. Se quiser ver outros sites de sua autoria, acesse o portfólio.
         </p>
         <div class="bg-cream rounded-xl p-6">
           <h2 class="font-display text-xl font-bold text-primary mb-4">Links</h2>
@@ -296,10 +299,10 @@
   </template>
 
   <!-- FOOTER -->
-  <footer class="bg-primary text-white py-8 mt-16">
+  <footer class="bg-gradient-to-r from-primary-light via-primary to-primary-dark text-white py-8 mt-16">
     <div class="max-w-6xl mx-auto px-4 text-center">
       <p class="text-cream text-sm">
-        Receitas CEI - Curso de Panificacao de Quintino
+        Receitas CEI - Curso de Panificação de Quintino
       </p>
       <p class="text-cream opacity-70 text-xs mt-2">
         Desenvolvido por Isaac Angelo

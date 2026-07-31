@@ -1,5 +1,5 @@
 -- Receitas CEI Backup
--- Data: 2026-07-28 19:47:56
+-- Data: 2026-07-31 14:23:06
 -- Banco: if0_42505744_receitas @ 127.0.0.1
 -- Total: 40 receitas
 

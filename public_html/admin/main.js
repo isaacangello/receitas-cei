@@ -54,7 +54,7 @@ Alpine.data('adminApp', () => ({
         this.key = ''
         await this.loadReceitas()
       } else {
-        this.error = data.error || 'Chave invalida'
+        this.error = data.error || 'Chave inválida'
       }
     } catch (e) {
       this.error = 'Erro ao conectar: ' + e.message
@@ -116,7 +116,7 @@ Alpine.data('adminApp', () => ({
     try {
       ingredientes = JSON.parse(this.form.ingredientes_json)
     } catch {
-      this.error = 'JSON de ingredientes invalido'
+      this.error = 'JSON de ingredientes inválido'
       return
     }
 
@@ -164,7 +164,7 @@ Alpine.data('adminApp', () => ({
         headers: this.authHeaders(),
       })
       if (res.ok) {
-        this.message = 'Receita excluida!'
+        this.message = 'Receita excluída!'
         await this.loadReceitas()
         setTimeout(() => (this.message = ''), 3000)
       }
@@ -202,11 +202,11 @@ Alpine.data('adminApp', () => ({
 
     const ext = file.name.split('.').pop().toLowerCase()
     if (!['doc', 'docx', 'txt', 'md'].includes(ext)) {
-      this.importError = 'Formato nao suportado: .' + ext
+      this.importError = 'Formato não suportado: .' + ext
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      this.importError = 'Arquivo muito grande. Maximo: 5MB'
+      this.importError = 'Arquivo muito grande. Máximo: 5MB'
       return
     }
 
@@ -220,7 +220,7 @@ Alpine.data('adminApp', () => ({
         const arrayBuffer = await file.arrayBuffer()
         const mammothResult = await mammoth.extractRawText({ arrayBuffer })
         const text = mammothResult.value
-        if (!text || !text.trim()) throw new Error('Nenhum texto extraido do .docx')
+        if (!text || !text.trim()) throw new Error('Nenhum texto extraído do .docx')
 
         const parseRes = await fetch(this.API + '/import.php', {
           method: 'POST',
@@ -233,7 +233,7 @@ Alpine.data('adminApp', () => ({
       } else if (ext === 'doc') {
         const arrayBuffer = await file.arrayBuffer()
         const text = docToText(arrayBuffer)
-        if (!text || !text.trim()) throw new Error('Nenhum texto extraido do .doc')
+        if (!text || !text.trim()) throw new Error('Nenhum texto extraído do .doc')
 
         const parseRes = await fetch(this.API + '/import.php', {
           method: 'POST',
@@ -313,7 +313,7 @@ Alpine.data('adminApp', () => ({
         body: JSON.stringify({ action }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erro ao executar acao')
+      if (!res.ok) throw new Error(data.error || 'Erro ao executar ação')
       return data
     } catch (e) {
       this.error = 'Erro: ' + e.message
@@ -354,10 +354,10 @@ Alpine.data('adminApp', () => ({
       return
     }
     if (!file.name.endsWith('.sql')) {
-      this.error = 'Arquivo deve ter extensao .sql'
+      this.error = 'Arquivo deve ter extensão .sql'
       return
     }
-    if (!confirm('ATENCAO: Isso vai SUBSTITUIR todas as receitas atuais pelo conteudo do backup. Continuar?')) return
+    if (!confirm('ATENÇÃO: Isso vai SUBSTITUIR todas as receitas atuais pelo conteúdo do backup. Continuar?')) return
 
     this.message = 'Importando backup...'
     this.error = ''
@@ -430,7 +430,7 @@ Alpine.data('adminApp', () => ({
   },
 
   async batchImport() {
-    if (!confirm('Importar todos os .doc da pasta de receitas? Duplicatas serao puladas automaticamente.')) return
+    if (!confirm('Importar todos os .doc da pasta de receitas? Duplicatas serão puladas automaticamente.')) return
     this.batchImporting = true
     this.batchImportResult = ''
     this.error = ''
@@ -449,17 +449,17 @@ Alpine.data('adminApp', () => ({
         await this.loadReceitas()
         setTimeout(() => (this.batchImportResult = ''), 10000)
       } else {
-        this.error = data.error || 'Erro na importacao'
+        this.error = data.error || 'Erro na importação'
       }
     } catch (e) {
-      this.error = 'Erro na importacao: ' + e.message
+      this.error = 'Erro na importação: ' + e.message
     } finally {
       this.batchImporting = false
     }
   },
 
   async freshDb() {
-    if (!confirm('ATENCAO: Isso vai APAGAR TODAS as receitas do banco. Continuar?')) return
+    if (!confirm('ATENÇÃO: Isso vai APAGAR TODAS as receitas do banco. Continuar?')) return
     const result = await this.dbAction('fresh')
     if (result) {
       this.message = result.message

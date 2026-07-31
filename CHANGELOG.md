@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-07-31
+
+### Bug Fixes
+- Filtro por categoria na página de receitas não funcionava: o router tratava o hash `#/receitas?cat=X` como rota `receitas?cat=X`, não renderizando a página
+- Router agora separa path de query string e popula `params` (`?cat=...`, etc.) com `decodeURIComponent`
+- `getAll()` filtra a lista pela categoria da rota (`router.params.cat`), combinando com a busca
+- Botões de filtro usam `$store.router.params.cat` para o estado ativo (antes comparavam `window.location.hash`)
+- Hash de categorias usa `encodeURIComponent` (robusto para nomes com acento/espaço), inclusive nos cards de categoria da home
+- Cards de categoria da home (`#/receitas?cat=...`) passam a abrir a lista já filtrada
+
+### Interface
+- Gradiente monochrome (marrom) na navbar, footer e botões; gradiente laranja (accent) em botões de destaque
+- Ortografia corrigida na interface (index.html, admin) e no conteúdo das receitas (patch SQL `sqls/correcoes-ortografia.sql`)
+- Nota "Todas as receitas do ano de 2009 são do livro de padeiro." adicionada na seção Sobre
+
+### Scripts e Backup
+- Novo `scripts/fix-ortografia.mjs`: gera correções ortográficas de acentuação nos textos e chaves de ingredientes (com `--dry-run`, `--verbose`, `--sql` e `--from` para dumps do `export-sql`)
+- Gerado `sqls/correcoes-ortografia.sql` com 18 UPDATEs (aplicar via Admin → DB → Restaurar)
+- Backup `sqls/receitas-backup-2026-07-31.sql` (estado local atual, 40 receitas)
+
 ## [1.1.1] - 2026-07-28
 
 ### Deploy: .env via GitHub Secret

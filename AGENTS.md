@@ -11,7 +11,7 @@ Substitui o projeto antigo em `pao.50webs.org`.
 - **Banco:** MySQL (InfinityFree: `sql202.infinityfree.com`, `if0_42505744_receitas`)
 - **Deploy:** FTP via GitHub Actions para InfinityFree (`ftpupload.net`)
 - **URL:** `https://receitas.free.nf`
-- **Versão:** v1.1.1
+- **Versão:** v1.1.2
 - **Template visual:** Chef's Kitchen (ThemeWagon)
 
 ## Estrutura do Projeto
