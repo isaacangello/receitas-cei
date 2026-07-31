@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.2.4] - 2026-07-31
+
+### Bug Fixes
+- Painel admin quebrava com "Unexpected token '<'..." ao tentar logar/operar: o InfinityFree (openresty) serve um desafio anti-bot JS (`testcookie-nginx-module`, cookie `__test`) em respostas sem o cookie, e `fetch()` não executa o JS do desafio — o body HTML chegava no `res.json()`
+- Novo helper `apiFetch` no admin: detecta resposta `text/html` (página do desafio), recarrega a página (que resolve o desafio e seta o cookie) até 2x; se persistir, exibe erro claro pedindo para habilitar cookies
+- Todos os `fetch(...)` do painel (`/api/auth.php`, `/api/receitas.php`, `/api/import.php`, `/api/db.php`, `/api/images.php`, `/api/batch-import.php`) passam a usar o helper
+
 ## [1.2.1] - 2026-07-31
 
 ### SEO: JSON-LD Recipe enriquecido

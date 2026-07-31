@@ -2,6 +2,23 @@ import Alpine from 'alpinejs'
 import mammoth from 'mammoth/mammoth.browser'
 import { textToRecipe } from '../js/parse-recipe.js'
 
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, options)
+  const ct = res.headers.get('content-type') || ''
+  if (ct.includes('text/html')) {
+    const attempts = parseInt(sessionStorage.getItem('cf-reloads') || '0', 10)
+    if (attempts < 2) {
+      sessionStorage.setItem('cf-reloads', String(attempts + 1))
+      location.reload()
+      return new Promise(() => {})
+    }
+    sessionStorage.removeItem('cf-reloads')
+    throw new Error('O servidor pediu uma verificação anti-bot. Habilite cookies para este site e recarregue a página.')
+  }
+  sessionStorage.removeItem('cf-reloads')
+  return res
+}
+
 window.Alpine = Alpine
 
 Alpine.data('adminApp', () => ({
@@ -28,7 +45,7 @@ Alpine.data('adminApp', () => ({
 
   async init() {
     try {
-      const res = await fetch(this.API + '/auth.php', { credentials: 'same-origin' })
+      const res = await apiFetch(this.API + '/auth.php', { credentials: 'same-origin' })
       if (res.ok) {
         const data = await res.json()
         this.authenticated = true
@@ -41,7 +58,7 @@ Alpine.data('adminApp', () => ({
   async login() {
     this.error = ''
     try {
-      const res = await fetch(this.API + '/auth.php', {
+      const res = await apiFetch(this.API + '/auth.php', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
@@ -62,7 +79,7 @@ Alpine.data('adminApp', () => ({
   },
 
   async logout() {
-    await fetch(this.API + '/auth.php', {
+    await apiFetch(this.API + '/auth.php', {
       method: 'DELETE',
       credentials: 'same-origin',
     })
@@ -80,7 +97,7 @@ Alpine.data('adminApp', () => ({
 
   async loadReceitas() {
     try {
-      const res = await fetch(this.API + '/receitas.php', { credentials: 'same-origin' })
+      const res = await apiFetch(this.API + '/receitas.php', { credentials: 'same-origin' })
       this.receitas = await res.json()
     } catch (e) {
       this.error = 'Erro ao carregar receitas: ' + e.message
@@ -135,7 +152,7 @@ Alpine.data('adminApp', () => ({
 
     const method = this.editing ? 'PUT' : 'POST'
     try {
-      const res = await fetch(this.API + '/receitas.php', {
+      const res = await apiFetch(this.API + '/receitas.php', {
         method,
         credentials: 'same-origin',
         headers: this.authHeaders(),
@@ -158,7 +175,7 @@ Alpine.data('adminApp', () => ({
   async deleteReceita(id) {
     if (!confirm('Tem certeza que deseja excluir esta receita?')) return
     try {
-      const res = await fetch(this.API + '/receitas.php?id=' + encodeURIComponent(id), {
+      const res = await apiFetch(this.API + '/receitas.php?id=' + encodeURIComponent(id), {
         method: 'DELETE',
         credentials: 'same-origin',
         headers: this.authHeaders(),
@@ -222,7 +239,7 @@ Alpine.data('adminApp', () => ({
         const text = mammothResult.value
         if (!text || !text.trim()) throw new Error('Nenhum texto extraído do .docx')
 
-        const parseRes = await fetch(this.API + '/import.php', {
+        const parseRes = await apiFetch(this.API + '/import.php', {
           method: 'POST',
           credentials: 'same-origin',
           headers: this.authHeaders(),
@@ -235,7 +252,7 @@ Alpine.data('adminApp', () => ({
         const text = docToText(arrayBuffer)
         if (!text || !text.trim()) throw new Error('Nenhum texto extraído do .doc')
 
-        const parseRes = await fetch(this.API + '/import.php', {
+        const parseRes = await apiFetch(this.API + '/import.php', {
           method: 'POST',
           credentials: 'same-origin',
           headers: this.authHeaders(),
@@ -247,7 +264,7 @@ Alpine.data('adminApp', () => ({
         const formData = new FormData()
         formData.append('file', file)
 
-        const res = await fetch(this.API + '/import.php', {
+        const res = await apiFetch(this.API + '/import.php', {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
@@ -306,7 +323,7 @@ Alpine.data('adminApp', () => ({
     this.error = ''
     this.message = ''
     try {
-      const res = await fetch(this.API + '/db.php?action=' + action, {
+      const res = await apiFetch(this.API + '/db.php?action=' + action, {
         method: 'POST',
         credentials: 'same-origin',
         headers: this.authHeaders(),
@@ -364,7 +381,7 @@ Alpine.data('adminApp', () => ({
 
     const text = await file.text()
     try {
-      const res = await fetch(this.API + '/db.php?action=import-sql', {
+      const res = await apiFetch(this.API + '/db.php?action=import-sql', {
         method: 'POST',
         credentials: 'same-origin',
         headers: {
@@ -396,7 +413,7 @@ Alpine.data('adminApp', () => ({
       return
     }
     try {
-      const res = await fetch(this.API + '/images.php?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
+      const res = await apiFetch(this.API + '/images.php?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
       const data = await res.json()
       if (data.url) {
         this.form.image_url = data.url
@@ -417,7 +434,7 @@ Alpine.data('adminApp', () => ({
       return
     }
     try {
-      const res = await fetch(this.API + '/images.php?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
+      const res = await apiFetch(this.API + '/images.php?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
       const data = await res.json()
       if (data.url) {
         this.importRecipe.image_url = data.url
@@ -435,7 +452,7 @@ Alpine.data('adminApp', () => ({
     this.batchImportResult = ''
     this.error = ''
     try {
-      const res = await fetch(this.API + '/batch-import.php', {
+      const res = await apiFetch(this.API + '/batch-import.php', {
         method: 'POST',
         credentials: 'same-origin',
         headers: {
