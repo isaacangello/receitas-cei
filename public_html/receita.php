@@ -115,9 +115,13 @@ $jsonLd = [
     'name' => $receita['titulo'],
     'description' => $desc,
     'recipeCategory' => $receita['categoria'],
-    'author' => ['@type' => 'Organization', 'name' => 'Curso de Panificação CEI de Quintino'],
-    'publisher' => ['@type' => 'Organization', 'name' => 'Receitas CEI'],
+    'recipeCuisine' => 'Brasileira',
+    'keywords' => implode(', ', array_filter(['panificação', $receita['categoria'], $receita['titulo']])),
+    'author' => ['@type' => 'Organization', 'name' => 'Curso de Panificação CEI de Quintino', 'url' => $siteUrl],
+    'publisher' => ['@type' => 'Organization', 'name' => 'Receitas CEI', 'url' => $siteUrl],
     'inLanguage' => 'pt-BR',
+    'isAccessibleForFree' => true,
+    'mainEntityOfPage' => $canonical,
     'recipeIngredient' => $flat,
     'recipeInstructions' => array_map(function ($step) {
         return ['@type' => 'HowToStep', 'text' => $step];

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-07-31
+
+### SEO: JSON-LD Recipe enriquecido
+- Campos recomendados adicionados ao schema Recipe: `recipeCuisine` ("Brasileira"), `keywords`, `mainEntityOfPage`, `isAccessibleForFree`
+- `author` e `publisher` agora incluem `url`; autor mantido como Organization "Curso de Panificação CEI de Quintino"
+- Publisher sem logo por enquanto (favicon 40x40 abaixo dos 112px exigidos pelo Google; logo adequada será criada na Fase 3)
+
 ## [1.2.0] - 2026-07-31
 
 ### SEO: URLs limpas + prerender no PHP
