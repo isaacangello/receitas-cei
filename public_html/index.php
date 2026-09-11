@@ -56,6 +56,11 @@ $head .= '  <meta property="og:title" content="' . htmlspecialchars($m['title'])
 $head .= '  <meta property="og:description" content="' . htmlspecialchars($m['desc']) . '">' . "\n";
 $head .= '  <meta property="og:url" content="' . htmlspecialchars($m['canonical']) . '">' . "\n";
 $head .= '  <meta property="og:locale" content="pt_BR">' . "\n";
+$head .= '  <meta property="og:image" content="https://receitas.free.nf/assets/og-image-default.jpg">' . "\n";
+$head .= '  <meta name="twitter:card" content="summary_large_image">' . "\n";
+$head .= '  <meta name="twitter:title" content="' . htmlspecialchars($m['title']) . '">' . "\n";
+$head .= '  <meta name="twitter:description" content="' . htmlspecialchars($m['desc']) . '">' . "\n";
+$head .= '  <meta name="twitter:image" content="https://receitas.free.nf/assets/og-image-default.jpg">' . "\n";
 
 $shell = str_replace('<head>', '<head>' . $head, $shell, $count);
 

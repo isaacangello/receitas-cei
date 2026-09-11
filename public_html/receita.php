@@ -143,6 +143,12 @@ $head .= '  <meta property="og:locale" content="pt_BR">' . "\n";
 if ($image) {
     $head .= '  <meta property="og:image" content="' . h($image) . '">' . "\n";
 }
+$head .= '  <meta name="twitter:card" content="summary_large_image">' . "\n";
+$head .= '  <meta name="twitter:title" content="' . h($title) . '">' . "\n";
+$head .= '  <meta name="twitter:description" content="' . h($desc) . '">' . "\n";
+if ($image) {
+    $head .= '  <meta name="twitter:image" content="' . h($image) . '">' . "\n";
+}
 $head .= '  <script type="application/ld+json">' . json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>' . "\n";
 
 $noscript = '<noscript>';

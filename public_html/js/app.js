@@ -68,7 +68,7 @@ Alpine.store('router', {
     let title = 'Receitas CEI - Curso de Panificação'
     let desc = 'Receitas do curso de panificação do CEI de Quintino. Aprenda a fazer pães, bolos, broas e doces artesanais em porcentagem de panificação.'
     let canonical = SITE_URL + '/'
-    let image = ''
+    let image = SITE_URL + '/assets/og-image-ReceitasCEI.jpg'
 
     if (this.current === 'receita') {
       const r = store.getById(this.params.id)
@@ -76,7 +76,7 @@ Alpine.store('router', {
         title = r.titulo + ' | Receitas CEI'
         desc = r.descricao || ('Receita de ' + r.titulo + ' do curso de panificação do CEI de Quintino.')
         canonical = SITE_URL + '/receita/' + encodeURIComponent(r.id)
-        image = r.image_url || ''
+        image = r.image_url || image
       }
     } else if (this.current === 'receitas') {
       title = 'Receitas de Panificação | Receitas CEI'
@@ -97,11 +97,11 @@ Alpine.store('router', {
     this.setMeta('og:title', title)
     this.setMeta('og:description', desc)
     this.setMeta('og:url', canonical)
-    if (image) {
-      this.setMeta('og:image', image)
-    } else {
-      this.removeMeta('og:image')
-    }
+    this.setMeta('og:image', image)
+    this.setMeta('twitter:card', 'summary_large_image')
+    this.setMeta('twitter:title', title)
+    this.setMeta('twitter:description', desc)
+    this.setMeta('twitter:image', image)
     this.setCanonical(canonical)
   },
 
@@ -122,16 +122,28 @@ Alpine.store('router', {
     if (el) el.remove()
   },
 
-  setCanonical(href) {
-    let el = document.querySelector('link[rel="canonical"]')
-    if (!el) {
-      el = document.createElement('link')
-      el.setAttribute('rel', 'canonical')
-      document.head.appendChild(el)
+setCanonical(href) {
+      let el = document.querySelector('link[rel="canonical"]')
+      if (!el) {
+        el = document.createElement('link')
+        el.setAttribute('rel', 'canonical')
+        document.head.appendChild(el)
+      }
+      el.setAttribute('href', href)
+    },
+
+    shareWhatsApp() {
+      const url = SITE_URL + window.location.pathname + window.location.search
+      const text = document.querySelector('meta[name="og:title"]')?.content + ' - ' + 
+                   document.querySelector('meta[name="og:description"]')?.content
+      const waUrl = 'https://wa.me/?text=' + encodeURIComponent(text + '\n' + url)
+      if (navigator.share) {
+        navigator.share({ title: document.title, url: url }).catch(() => window.open(waUrl, '_blank'))
+      } else {
+        window.open(waUrl, '_blank')
+      }
     }
-    el.setAttribute('href', href)
-  },
-})
+  })
 
 Alpine.store('receitas', {
   items: [],
